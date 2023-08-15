@@ -13,14 +13,16 @@ return new class extends Migration
     {
         Schema::create('pakets', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_paket');
-            $table->string('slug');
+            $table->string('nama_paket', 100);
+            $table->string('slug', 125);
             $table->double('harga');
-            $table->string('deskripsi');
+            $table->string('deskripsi', 191);
             $table->integer('masa_aktif',false,true);
-            $table->foreignId('type_activation_id')->unsigned();
+            $table->unsignedBigInteger('type_activation_id');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->foreign('type_activation_id')->references('id')->on('type_activations');
         });
     }
 
@@ -29,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('paket');
+        Schema::dropIfExists('pakets');
     }
 };

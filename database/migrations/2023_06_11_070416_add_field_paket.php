@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('memberships', function (Blueprint $table) {
-            $table->foreignId('paket_id')->unsigned();
+            $table->unsignedBigInteger('paket_id')->nullable();
+            $table->foreign('paket_id')->references('id')->on('pakets');
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('memberships', function (Blueprint $table) {
             $table->dropForeign('paket_id');
+            $table->dropColumn('paket_id');
         });
     }
 };

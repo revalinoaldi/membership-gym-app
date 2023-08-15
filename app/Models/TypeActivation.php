@@ -10,4 +10,10 @@ class TypeActivation extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    protected $table = 'type_activations';
+
+    public function getRouteKeyName()
+    {
+        return 'type';
+    }
 }

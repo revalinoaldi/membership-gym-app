@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('type_activations', function (Blueprint $table) {
+        Schema::create('kunjungan_dayin', function (Blueprint $table) {
             $table->id();
-            $table->string('type', 50);
-            $table->string('description', 191);
+            $table->string('kode_kunjungan', 14);
+            $table->date('datein');
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('type_activation');
+        Schema::dropIfExists('kunjungan_dayin');
     }
 };
