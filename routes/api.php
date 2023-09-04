@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PaketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('login', [LoginController::class, 'login']);
+Route::post('register', [LoginController::class, 'register']);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('profile', [LoginController::class, 'fetch']);
+    Route::post('profile', [LoginController::class, 'updateProfile']);
+    Route::post('logout', [LoginController::class, 'logout']);
+
+    // Modul Paket
+    Route::get('membership/paket', [PaketController::class, 'list']);
+    Route::post('membership/paket', [PaketController::class, 'store']);
+    Route::put('membership/paket/{paket}', [PaketController::class, 'update']);
+    Route::delete('membership/paket/{paket}', [PaketController::class, 'destroy']);
 });

@@ -10,7 +10,7 @@ class Membership extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
-    protected $table = 'membership';
+    protected $table = 'memberships';
 
     public function paket()
     {
@@ -25,6 +25,10 @@ class Membership extends Model
     public function transaksi()
     {
         return $this->hasMany(TransactionMembership::class, 'membership_id', 'id');
+    }
+
+    public function isUser(){
+        return $this->hasOne(IsMembership::class, 'membership_id', 'id');
     }
 
     public function getRouteKeyName()

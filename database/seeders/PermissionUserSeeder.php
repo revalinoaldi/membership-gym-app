@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -15,8 +16,8 @@ class PermissionUserSeeder extends Seeder
     public function run(): void
     {
         $role_admin = Role::create(['name' => 'ADMINISTRATOR']);
-        $role_kasir = Role::create(['name' => 'KASIR']);
-        $rols_founder = Role::create(['name' => 'FOUNDER']);
+        // $role_kasir = Role::create(['name' => 'KASIR']);
+        // $rols_founder = Role::create(['name' => 'FOUNDER']);
 
         // Permissions member
         $member_view = Permission::create(['name' => 'member view']);
@@ -36,7 +37,7 @@ class PermissionUserSeeder extends Seeder
         $transaksi_view = Permission::create(['name' => 'transaksi view']);
         $transaksi_create = Permission::create(['name' => 'transaksi create']);
         $transaksi_update = Permission::create(['name' => 'transaksi update']);
-        
+
         // Permissions Report
         $report_member_view = Permission::create(['name' => 'report member view']);
         $report_transaksi_view = Permission::create(['name' => 'report transaksi view']);
@@ -49,42 +50,43 @@ class PermissionUserSeeder extends Seeder
         ];
 
         // Set Permissions to kasir
-        $permissions_kasir = [
-            $paket_view, 
-            $member_view, $member_delete, $member_update, $member_create,
-            $transaksi_view, $transaksi_create, $transaksi_update,
-            $report_member_view, $report_transaksi_view
-        ];
+        // $permissions_kasir = [
+        //     $paket_view,
+        //     $member_view, $member_delete, $member_update, $member_create,
+        //     $transaksi_view, $transaksi_create, $transaksi_update,
+        //     $report_member_view, $report_transaksi_view
+        // ];
 
-        // Set Permissions to Founder 
-        $permissions_founder = [
-            $paket_view, $paket_create, $paket_update,
-            $member_view, 
-            $transaksi_view, 
-            $report_member_view, $report_transaksi_view
-        ];
+        // Set Permissions to Founder
+        // $permissions_founder = [
+        //     $paket_view, $paket_create, $paket_update,
+        //     $member_view,
+        //     $transaksi_view,
+        //     $report_member_view, $report_transaksi_view
+        // ];
 
         $role_admin->syncPermissions($permissions_admin);
-        $role_kasir->syncPermissions($permissions_kasir);
-        $rols_founder->syncPermissions($permissions_founder);
+        // $role_kasir->syncPermissions($permissions_kasir);
+        // $rols_founder->syncPermissions($permissions_founder);
 
         $user = \App\Models\User::factory()->create([
             'name' => 'Administrator',
             'email' => 'admin@admin.com',
+            'password' => Hash::make('password123')
         ]);
         $user->assignRole($role_admin);
 
-        $user = \App\Models\User::factory()->create([
-            'name' => 'Kasir Gym',
-            'email' => 'kasir@kasir.com',
-        ]);
-        $user->assignRole($role_kasir);
+        // $user = \App\Models\User::factory()->create([
+        //     'name' => 'Kasir Gym',
+        //     'email' => 'kasir@kasir.com',
+        // ]);
+        // $user->assignRole($role_kasir);
 
-        $user = \App\Models\User::factory()->create([
-            'name' => 'Founder',
-            'email' => 'founder.gym@founder.com',
-        ]);
-        $user->assignRole($rols_founder);
+        // $user = \App\Models\User::factory()->create([
+        //     'name' => 'Founder',
+        //     'email' => 'founder.gym@founder.com',
+        // ]);
+        // $user->assignRole($rols_founder);
 
     }
 }

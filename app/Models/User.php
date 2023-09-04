@@ -12,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     use HasApiTokens;
     use HasFactory;
@@ -62,13 +62,29 @@ class User extends Authenticatable implements JWTSubject
         'profile_photo_url',
     ];
 
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
+    public function transaction(){
+        return $this->hasMany(TransactionMembership::class, 'user_id', 'id');
     }
 
-    public function getJWTCustomClaims()
-    {
-        return [];
+    public function is_member(){
+        return $this->hasOne(IsMembership::class, 'user_id', 'id');
     }
+
+    public function kunjungan_dayin(){
+        return $this->hasMany(KunjunganDayin::class, 'user_id', 'id');
+    }
+
+    public function kunjungan_member(){
+        return $this->hasMany(KunjunganMember::class, 'user_id', 'id');
+    }
+
+    // public function getJWTIdentifier()
+    // {
+    //     return $this->getKey();
+    // }
+
+    // public function getJWTCustomClaims()
+    // {
+    //     return [];
+    // }
 }
