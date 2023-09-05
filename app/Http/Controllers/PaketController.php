@@ -7,6 +7,8 @@ use Illuminate\Support\Str;
 use App\Models\Paket;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaketController extends Controller
 {
@@ -40,10 +42,13 @@ class PaketController extends Controller
      */
     public function store(PaketRequest $request)
     {
+        DB::beginTransaction();
         try {
             $data = $request->all();
             $data['slug'] = Str::slug($data['nama_paket']);
             Paket::create($data);
+
+            DB::commit();
 
             return response()->json([
                 'result' => true,
@@ -51,6 +56,7 @@ class PaketController extends Controller
                 'data' => []
             ], 201);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -64,7 +70,21 @@ class PaketController extends Controller
      */
     public function show(Paket $paket)
     {
-        //
+        try{
+            $paket['activation'] = @$paket->activation;
+            return response()->json([
+                'result' => true,
+                'message' => 'Success paket membership',
+                'data' => $paket
+            ], 200);
+        }catch (NotFoundHttpException $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 404);
+        }
+
     }
 
     /**
@@ -80,19 +100,22 @@ class PaketController extends Controller
      */
     public function update(PaketRequest $request, Paket $paket)
     {
-        dd($paket);
+        DB::beginTransaction();
         try {
             $data = $request->all();
             $data['slug'] = Str::slug($data['nama_paket']);
 
             $paket->update($data);
 
+            DB::commit();
+
             return response()->json([
                 'result' => true,
                 'message' => 'Success update new data paket membership',
                 'data' => []
-            ], 201);
+            ], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),
@@ -106,15 +129,18 @@ class PaketController extends Controller
      */
     public function destroy(Paket $paket)
     {
+        DB::beginTransaction();
         try {
             $paket->delete();
 
+            DB::commit();
             return response()->json([
                 'result' => true,
                 'message' => 'Success delete data paket membership',
                 'data' => []
             ], 200);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json([
                 'result' => false,
                 'message' => $e->getMessage(),

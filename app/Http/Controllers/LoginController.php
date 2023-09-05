@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\IsMembership;
 use App\Models\Membership;
 use App\Models\User;
 use Carbon\Carbon;
@@ -36,10 +37,19 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         try {
-            $request->validate([
+            $rules = [
                 'email' => 'email|required',
                 'password' => 'required'
-            ]);
+            ];
+
+            $validator = Validator::make($request->all(),$rules);
+            if($validator->fails()){
+                return response()->json([
+                    'message' => 'Failed! Invalid Inputs',
+                    'error' => $validator->errors(),
+                    'result' => false
+                ], 500);
+            }
 
             $credentials = request(['email', 'password']);
             if (!Auth::attempt($credentials)) {
@@ -96,7 +106,11 @@ class LoginController extends Controller
 
             $validator = Validator::make($request->all(), $valid);
             if($validator->fails()){
-                throw new Exception('Validation Eror!');
+                return response()->json([
+                    'message' => 'Failed! Something went wrong',
+                    'error' => $validator->errors(),
+                    'result' => false
+                ], 500);
             }
 
             User::create([
@@ -118,6 +132,11 @@ class LoginController extends Controller
                     'alamat' => $request->alamat,
                     'no_telp' => $request->no_telp,
                     'token' => $tokenResult
+                ]);
+
+                IsMembership::create([
+                    'user_id' => $user->id,
+                    'membership_id' => $member->id
                 ]);
 
                 $user['isMember'] = $member;

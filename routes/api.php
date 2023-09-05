@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PaketController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +28,22 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Modul Paket
     Route::get('membership/paket', [PaketController::class, 'list']);
+    Route::get('membership/paket/{paket}', [PaketController::class, 'show']);
     Route::post('membership/paket', [PaketController::class, 'store']);
-    Route::put('membership/paket/{paket}', [PaketController::class, 'update']);
+    Route::post('membership/paket/{paket}/update', [PaketController::class, 'update']);
     Route::delete('membership/paket/{paket}', [PaketController::class, 'destroy']);
+
+    // Modul Paket
+    Route::get('membership/list', [MembershipController::class, 'list']);
+    Route::get('membership/list/{membership}', [MembershipController::class, 'show']);
+    Route::post('membership/list', [MembershipController::class, 'store']);
+    Route::post('membership/list/{membership}/update', [MembershipController::class, 'update']);
+    Route::delete('membership/list/{membership}', [MembershipController::class, 'destroy']);
+
+    // Modul Transaction
+    Route::get('membership/transaction', [TransactionController::class, 'list']);
+    Route::get('membership/checkout/{transaction}', [TransactionController::class, 'show']);
+    Route::post('membership/checkout', [TransactionController::class, 'store']);
+    Route::post('membership/checkout/{transaction}/update', [TransactionController::class, 'update']);
+    Route::delete('membership/checkout/{transaction}', [TransactionController::class, 'destroy']);
 });

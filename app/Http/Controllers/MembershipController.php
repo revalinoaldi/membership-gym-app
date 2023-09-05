@@ -15,6 +15,31 @@ class MembershipController extends Controller
         //
     }
 
+    public function list(Request $request){
+        $get = Membership::with(['paket', 'transaksi']);
+
+        if(@$request->jenis_kelamin){
+            $get->where('jenis_kelamin', $request->jenis_kelamin);
+        }
+
+        if(@$request->status){
+            $get->where('status', $request->status);
+        }
+
+        if(@$request->paket){
+            $paket = $request->paket;
+            $get->whereHas('paket', function($query) use($paket){
+                $query->where('slug', $paket);
+            });
+        }
+
+        return response()->json([
+            'result' => true,
+            'message' => 'Success user membership',
+            'data' => $get->orderBy('created_at', 'desc')->get()
+        ], 200);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
