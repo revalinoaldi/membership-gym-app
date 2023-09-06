@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Midtrans\Snap;
 use Midtrans\Config;
 use Midtrans\Notification;
@@ -63,22 +64,35 @@ class TransactionController extends Controller
      */
     public function store(TransactionsRequest $request)
     {
-        $dateNow = Carbon::now();
-        $data = $request->all();
-        $data['membership_id'] = Auth::user()->id;
-        $data['kode_transaksi'] = "{$dateNow->format('dm')}-{$dateNow->format('Y')}-{$dateNow->format('His')}-".mt_rand(100,999)."-".mt_rand(100,999)."-".(@$data['type'] == 1 ? "0{$data['type']}" : $data['type']);
-        $data['tgl_transaksi'] = $dateNow->format('Y-m-d H:i:s');
+        DB::beginTransaction();
+        try {
+            $dateNow = Carbon::now();
+            $data = $request->all();
+            $data['membership_id'] = Auth::user()->is_member->member->id;
+            $data['kode_transaksi'] = "{$dateNow->format('dm')}-{$dateNow->format('Y')}-{$dateNow->format('His')}-".mt_rand(100,999)."-".mt_rand(100,999)."-".(@$data['type'] == 1 ? "0{$data['type']}" : $data['type']);
+            $data['tgl_transaksi'] = $dateNow->format('Y-m-d H:i:s');
 
-        $data['expired_date'] = $dateNow->addDays(1)->format('Y-m-d H:i:s');
+            $data['expired_date'] = $dateNow->addDays(1)->format('Y-m-d H:i:s');
 
-        $data['payment_url'] = $this->_generateUrlPayment($data['kode_transaksi'], $request->total_biaya, $request->paket_id);
-        // $data['member'] = Auth::user()->is_member->member;
+            $data['payment_url'] = $this->_generateUrlPayment($data['kode_transaksi'], $request->total_biaya, $request->paket_id);
 
-        return response()->json([
-            'result' => true,
-            'message' => 'successful generate transaction',
-            'data' => $data
-        ], 201);
+            TransactionMembership::create($data);
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'successful generate transaction',
+                'data' => $data
+            ], 201);
+        } catch (Exception $error) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => $error->getMessage(),
+                'data' => []
+            ], 400);
+        }
+
     }
 
     private function _generateUrlPayment($transCode, $total, $paket_id){
@@ -127,7 +141,7 @@ class TransactionController extends Controller
 
         try {
             // Ambil halaman payment midtrans
-            $paymentUrl = Snap::createTransaction($midtrans);
+            $paymentUrl = Snap::createTransaction($midtrans)->redirect_url;
 
             // Redirect ke halaman midtrans
             return $paymentUrl;
@@ -137,6 +151,105 @@ class TransactionController extends Controller
                 'result' => true,
                 'message' => $e->getMessage()
             ];
+        }
+    }
+
+    public function callback(Request $request)
+    {
+        // Set konfigurasi midtrans
+        Config::$serverKey = config('services.midtrans.serverKey');
+        Config::$isProduction = config('services.midtrans.isProduction');
+        Config::$isSanitized = config('services.midtrans.isSanitized');
+        Config::$is3ds = config('services.midtrans.is3ds');
+
+        // Buat instance midtrans notification
+        $notification = new Notification();
+
+        // Assign ke variable untuk memudahkan coding
+        $status = $notification->transaction_status;
+        $type = $notification->payment_type;
+        $fraud = $notification->fraud_status;
+        $order_id = $notification->order_id;
+
+        // Cari transaksi berdasarkan ID
+        $transaction = TransactionMembership::where('kode_transaksi', $order_id)->firstOrFail();
+
+        $callback = [
+            'trans_callback' => $notification
+        ];
+        // Handle notification status midtrans
+        if ($status == 'capture') {
+            if ($type == 'credit_card'){
+                if($fraud == 'challenge'){
+                    $callback['status'] = 'PENDING';
+                }
+                else {
+                    $callback['status'] = 'SUCCESS';
+                    $transaction->paid_status = '1';
+                }
+            }
+        }
+        else if ($status == 'settlement'){
+            $callback['status'] = 'SUCCESS';
+            $transaction->paid_status = '1';
+        }
+        else if($status == 'pending'){
+            $callback['status'] = 'PENDING';
+        }
+        else if ($status == 'deny') {
+            $callback['status'] = 'CANCELLED';
+        }
+        else if ($status == 'expire') {
+            $callback['status'] = 'CANCELLED';
+        }
+        else if ($status == 'cancel') {
+            $callback['status'] = 'CANCELLED';
+        }
+
+        $transaction->remark = $notification;
+        // Simpan transaksi
+        $transaction->save();
+
+        // Kirimkan email
+        if ($transaction)
+        {
+            if($status == 'capture' && $fraud == 'accept' )
+            {
+                //
+            }
+            else if ($status == 'settlement')
+            {
+                //
+            }
+            else if ($status == 'success')
+            {
+                //
+            }
+            else if($status == 'capture' && $fraud == 'challenge' )
+            {
+                return response()->json([
+
+                        'code' => 200,
+                        'message' => 'Midtrans Payment Challenge'
+
+                ], 200);
+            }
+            else
+            {
+                return response()->json([
+
+                        'code' => 200,
+                        'message' => 'Midtrans Payment not Settlement'
+
+                ], 200);
+            }
+
+            return response()->json([
+
+                    'code' => 200,
+                    'message' => 'Midtrans Notification Success'
+
+            ], 200);
         }
     }
 

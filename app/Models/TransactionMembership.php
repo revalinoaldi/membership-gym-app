@@ -11,7 +11,8 @@ class TransactionMembership extends Model
     use HasFactory;
     use HasUuids;
 
-    protected $guarded = ['id'];
+    protected $guarded = ['uid'];
+    protected $primaryKey = 'uid';
     protected $table = 'transaction_memberships';
 
     public function users()
