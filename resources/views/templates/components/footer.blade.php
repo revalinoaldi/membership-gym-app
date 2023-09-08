@@ -1,3 +1,11 @@
-<p class="pt-6 text-center dark:text-white-dark ltr:sm:text-left rtl:sm:text-right">
-    © <span id="footer-year">2022</span>. Vristo All rights reserved.
-</p>
+<div class="container-xxl">
+    <div class="footer-container d-flex align-items-center justify-content-center py-2 flex-md-row flex-column">
+        <div>
+            © <script>
+                document.write(new Date().getFullYear())
+
+            </script>
+            , made with ❤️ by <a href="#" target="_blank" class="fw-medium">Natural Fitness Gym </a>
+        </div>
+    </div>
+</div>

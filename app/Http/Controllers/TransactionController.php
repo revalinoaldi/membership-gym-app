@@ -11,9 +11,11 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Midtrans\Snap;
 use Midtrans\Config;
 use Midtrans\Notification;
+use Midtrans\Transaction as TransactionMidtrans;
 
 
 class TransactionController extends Controller
@@ -152,6 +154,58 @@ class TransactionController extends Controller
                 'message' => $e->getMessage()
             ];
         }
+    }
+
+    public function cancleTransaction(Request $request, TransactionMembership $transaction){
+        $validator = Validator::make($request->all(), [
+            'transaction_id' => 'required|exists:transaction_memberships,kode_transaksi',
+            'member_id' => 'required|exists:memberships,id'
+        ]);
+
+        if($validator->fails()){
+            return response()->json([
+                'message' => 'Error!',
+                'error' => $validator->errors(),
+                'result' => false
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Set konfigurasi midtrans
+            Config::$serverKey = config('services.midtrans.serverKey');
+            Config::$isProduction = config('services.midtrans.isProduction');
+            Config::$isSanitized = config('services.midtrans.isSanitized');
+            Config::$is3ds = config('services.midtrans.is3ds');
+
+            $callback = TransactionMidtrans::cancel($request->transaction_id);
+
+            if($request->membership_id != Auth::user()->is_member->member->id){
+                throw new Exception("Cannot cancel of the transaction! You not own this transaction!");
+            }
+
+            $callback['status'] = 'CANCELLED';
+
+            $trans = TransactionMembership::where('kode_transaksi', $request->transaction_id)->firstOrFail();
+            $trans->remark = $callback;
+            $trans->save();
+
+            DB::commit();
+
+            return response()->json([
+                'result' => true,
+                'message' => 'Success, transaction is canceled',
+                'data' => $trans
+            ], 201);
+        } catch (Exception $error) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => $error->getMessage(),
+                'data' => []
+            ], 400);
+        }
+
     }
 
     public function callback(Request $request)

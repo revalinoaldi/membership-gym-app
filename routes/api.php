@@ -44,6 +44,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('membership/transaction', [TransactionController::class, 'list']);
     Route::get('membership/checkout/{transaction}', [TransactionController::class, 'show']);
     Route::post('membership/checkout', [TransactionController::class, 'store']);
+
+    Route::post('membership/checkout/{transaction}/cancel', [TransactionController::class, 'cancleTransaction']);
+
     Route::post('membership/checkout/{transaction}/update', [TransactionController::class, 'update']);
     Route::delete('membership/checkout/{transaction}', [TransactionController::class, 'destroy']);
 });

@@ -27,9 +27,10 @@ Route::middleware([
         return view('welcome');
     });
 
-    Route::resource('paket', PaketController::class);
 
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 });
+
+Route::resource('paket', PaketController::class)->except(['store', 'show', 'update', 'destroy']);

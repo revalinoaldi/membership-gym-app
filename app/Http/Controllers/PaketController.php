@@ -12,21 +12,16 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaketController extends Controller
 {
+    /*************************************************
+     *                Return the View
+     **************************************************/
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
 
-    public function list(){
-        $get = Paket::with(['activation'])->orderBy('nama_paket', 'asc')->get();
-        return response()->json([
-            'result' => true,
-            'message' => 'Success paket membership',
-            'data' => $get
-        ], 200);
+        return view('templates.pages.paket.index');
     }
 
     /**
@@ -35,6 +30,27 @@ class PaketController extends Controller
     public function create()
     {
         //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Paket $paket)
+    {
+        //
+    }
+
+    /*************************************************
+     *                  Return the API
+     **************************************************/
+
+    public function list(){
+        $get = Paket::with(['activation'])->orderBy('nama_paket', 'asc')->get();
+        return response()->json([
+            'result' => true,
+            'message' => 'Success paket membership',
+            'data' => $get
+        ], 200);
     }
 
     /**
@@ -85,14 +101,6 @@ class PaketController extends Controller
             ], 404);
         }
 
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Paket $paket)
-    {
-        //
     }
 
     /**
