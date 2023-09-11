@@ -19,7 +19,7 @@
 
     <div class="row">
         <h4 class="py-3 mb-4">
-            <span class="text-muted fw-light">Memberships /</span> Paket
+            <span class="text-muted fw-light">Memberships /</span> Users Member
         </h4>
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -27,103 +27,53 @@
                 <table class="datatables-basic table">
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Jenis Paket</th>
-                            <th>Harga</th>
-                            <th>Deskripsi</th>
-                            <th>Masa Aktif</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Jenis Kelamin</th>
+                            <th>No Telp</th>
+                            <th>Alamat</th>
+                            <th>Status Member</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>1.</td>
-                            <td>Paket Harian</td>
-                            <td>Rp250.000</td>
-                            <td>Paket Harian + Instruktur Gym</td>
-                            <td>1 Days</td>
+                            <td>{{ fake()->unique()->name() }}</td>
+                            <th>{{ fake()->unique()->safeEmail() }}</th>
+                            <td>Laki-Laki</td>
+                            <td>(+62) 8157881923</td>
+                            <td>Bintara</td>
                             <td>
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-label-success" text-capitalized> Active</span>
                             </td>
-                            <td>#</td>
                         </tr>
                         <tr>
                             <td>2.</td>
-                            <td>Paket Mingguan</td>
-                            <td>Rp350.000</td>
-                            <td>Paket Mingguan + Instruktur Gym</td>
-                            <td>7 Days</td>
+                            <td>{{ fake()->unique()->name() }}</td>
+                            <th>{{ fake()->unique()->safeEmail() }}</th>
+                            <td>Laki-Laki</td>
+                            <td>(+62) 8157881923</td>
+                            <td>Jakarta</td>
                             <td>
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-label-success" text-capitalized> Active</span>
                             </td>
-                            <td>#</td>
                         </tr>
                         <tr>
                             <td>3.</td>
-                            <td>Paket Bulanan</td>
-                            <td>Rp600.000</td>
-                            <td>Paket Mingguan + Instruktur Gym + Soft Drink</td>
-                            <td>1 Month</td>
+                            <td>{{ fake()->unique()->name() }}</td>
+                            <th>{{ fake()->unique()->safeEmail() }}</th>
+                            <td>Laki-Laki</td>
+                            <td>(+62) 8157881923</td>
+                            <td>Bandung</td>
                             <td>
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-label-secondary" text-capitalized> Not Active </span>
                             </td>
-                            <td>#</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- Modal to add new record -->
-        <div class="offcanvas offcanvas-end" id="add-new-record">
-            <div class="offcanvas-header border-bottom">
-                <h5 class="offcanvas-title" id="exampleModalLabel">Form Paket</h5>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body flex-grow-1">
-                <form class="add-new-record pt-0 row g-2" id="form-add-new-record" onsubmit="return false">
-                    <div class="col-sm-12">
-                        <label class="form-label" for="nama_paket">Nama Paket</label>
-                        <div class="input-group input-group-merge">
-                            <span id="nama_paket2" class="input-group-text"><i class='ti ti-briefcase'></i></span>
-                            <input type="text" id="nama_paket" class="form-control dt-paket-name" name="nama_paket" placeholder="Nama Paket" aria-label="Nama Paket" aria-describedby="nama_paket2" />
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <label class="form-label" for="harga">Harga Paket</label>
-                        <div class="input-group input-group-merge">
-                            <span id="harga2" class="input-group-text">Rp</span>
-                            <input type="number" id="harga" name="harga" class="form-control dt-salary" placeholder="12000" aria-label="12000" aria-describedby="harga2" />
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <label class="form-label" for="deskripsi">Deskripsi</label>
-                        <div class="input-group input-group-merge">
-                            <textarea id="deskripsi" name="deskripsi" class="form-control dt-description" placeholder="Deskrkipsi Paket" aria-label="Deskrkipsi Paket" aria-describedby="deskripsi2"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <label class="form-label" for="masa_aktif">Masa Aktif</label>
-                        <div class="input-group">
-                            <input type="number" id="masa_aktif" name="masa_aktif" class="form-control dt-activation" placeholder="0" aria-label="0" />
-                            <select name="type_activation_id" id="type_activation_id" class="form-select dt-type-activation">
-                                <option value="" hidden>-- Select One --</option>
-                                @foreach ($aktivasi as $item)
-                                    <option value="{{ $item->id }}">{{ $item->description }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <button type="submit" class="btn btn-primary data-submit me-sm-3 me-1">Submit</button>
-                        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
-                    </div>
-                </form>
-
-            </div>
-        </div>
-        <!--/ DataTable with Buttons -->
     </div>
 
     @push('scripts')
@@ -138,78 +88,16 @@
     {{-- <script src="/assets/js/tables-datatables-basic.js"></script> --}}
 
     <script>
-        let fv, offCanvasEl;
-        document.addEventListener("DOMContentLoaded", function(e) {
-            var t;
-            t = document.getElementById("form-add-new-record"), setTimeout(() => {
-                const e = document.querySelector(".create-new"),
-                t = document.querySelector("#add-new-record");
-                e && e.addEventListener("click", function() {
-                    offCanvasEl = new bootstrap.Offcanvas(t),
-                        t.querySelector(".dt-paket-name").value = "",
-                        t.querySelector(".dt-salary").value = "",
-                        t.querySelector(".dt-description").value = "",
-                        t.querySelector(".dt-activation").value = "",
-                        t.querySelector(".dt-type-activation").value = "",
-                    offCanvasEl.show()
-                })
-            }, 200), fv = FormValidation.formValidation(t, {
-                fields: {
-                    nama_paket: {
-                        validators: {
-                            notEmpty: {
-                                message: "Nama Paket Tidak Boleh Kosong"
-                            }
-                        }
-                    },
-                    harga: {
-                        validators: {
-                            notEmpty: {
-                                message: "Harga Paket Tidak Boleh Kosong"
-                            }
-                        }
-                    },
-                    deskripsi: {
-                        validators: {
-                            notEmpty: {
-                                message: "Deskripsi Paket Tidak Boleh Kosong"
-                            }
-                        }
-                    },
-                    masa_aktif: {
-                        validators: {
-                            notEmpty: {
-                                message: "Masa Aktif Paket Tidak Boleh Kosong"
-                            }
-                        }
-                    },
-                    type_activation_id: {
-                        validators: {
-                            notEmpty: {
-                                message: "Jenis Masa Aktif Paket Tidak Boleh Kosong"
-                            }
-                        }
-                    }
-                },
-                plugins: {
-                    trigger: new FormValidation.plugins.Trigger,
-                    bootstrap5: new FormValidation.plugins.Bootstrap5({
-                        eleValidClass: "",
-                        rowSelector: ".col-sm-12"
-                    }),
-                    submitButton: new FormValidation.plugins.SubmitButton,
-                    autoFocus: new FormValidation.plugins.AutoFocus
-                },
-                init: e => {
-                    e.on("plugins.message.placed", function(e) {
-                        e.element.parentElement.classList.contains("input-group") && e.element.parentElement.insertAdjacentElement("afterend", e.messageElement)
-                    })
-                }
+        $(document).ready(() => {
+            $('.add-new').on('click', () => {
+                alert(`Hello World`)
             })
-        }), $(function() {
         })
         $(".datatables-basic").DataTable({
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            // order: [
+            //     [1, "desc"]
+            // ],
             // displayLength: 7,
             // lengthMenu: [7, 10, 25, 50, 75, 100],
             buttons: [{
@@ -297,7 +185,7 @@
                 }]
             }, {
                 text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                className: "create-new btn btn-primary"
+                className: "btn btn-primary add-new"
             }],
             responsive: {
                 details: {
@@ -315,7 +203,7 @@
                     }
                 }
             }
-        }), $("div.head-label").html('<h5 class="card-title mb-0">List Paket Memberships</h5>');
+        }), $("div.head-label").html('<h5 class="card-title mb-0">List Data User</h5>');
     </script>
     @endpush
 </x-display-layout>

@@ -6,6 +6,7 @@ use App\Http\Requests\TransactionsRequest;
 use App\Models\IsMembership;
 use App\Models\Paket;
 use App\Models\TransactionMembership;
+use App\Models\TypeActivation;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,6 +25,43 @@ class TransactionController extends Controller
      * Display a listing of the resource.
      */
     public function index()
+    {
+        return view('templates.pages.transaksi.index');
+    }
+
+        /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
+    {
+        return view('templates.pages.transaksi.form',[
+            'pakets' => Paket::get(),
+            'isExtends' => @$request->type == 'extends' ? 99 : 1
+        ]);
+    }
+
+        /**
+     * Display the specified resource.
+     */
+    // public function show(TransactionMembership $transaction)
+    public function show($transaction)
+    {
+        return view('templates.pages.transaksi.show',[
+            'transaksi' => $transaction
+        ]);
+    }
+
+    public function payment($transaction)
+    {
+        return view('templates.pages.transaksi.payment',[
+            'transaksi' => $transaction
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(TransactionMembership $transaction)
     {
         //
     }
@@ -53,13 +91,7 @@ class TransactionController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -307,21 +339,7 @@ class TransactionController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(TransactionMembership $transaction)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TransactionMembership $transaction)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
