@@ -35,6 +35,10 @@ Route::middleware([
     // })->name('dashboard');
 });
 
+Route::get('test-url',function(){
+    return url('api/login');
+});
+
 Route::get('/home', function () {
     return view('templates.pages.dashboard');
 })->name('home');
@@ -44,3 +48,6 @@ Route::resource('dayin', DayinController::class);
 Route::resource('user/list', UsersController::class);
 Route::resource('user/member', MemberController::class);
 Route::get('transaksi/payment/{transaction}', [TransactionController::class, 'payment'])->name('transaksi.payment.member');
+
+
+Route::post('membership/login', [UsersController::class, 'setLogin'])->name('login.member');

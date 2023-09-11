@@ -131,7 +131,8 @@ class LoginController extends Controller
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'alamat' => $request->alamat,
                     'no_telp' => $request->no_telp,
-                    'token' => $tokenResult
+                    'token' => $tokenResult,
+                    'tgl_daftar' => Carbon::now()->format('Y-m-d H:i:s')
                 ]);
 
                 IsMembership::create([
