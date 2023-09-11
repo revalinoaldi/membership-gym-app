@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\DayinController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaketController;
+use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,9 +18,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/display', function () {
-    return view('templates.pages.dashboard');
-});
+
 
 Route::middleware([
     'auth:sanctum',
@@ -28,9 +30,17 @@ Route::middleware([
     });
 
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('dashboard');
+    // })->name('dashboard');
 });
 
+Route::get('/home', function () {
+    return view('templates.pages.dashboard');
+})->name('home');
 Route::resource('paket', PaketController::class)->except(['store', 'show', 'update', 'destroy']);
+Route::resource('transaksi', TransactionController::class)->except(['store', 'update', 'destroy']);
+Route::resource('dayin', DayinController::class);
+Route::resource('user/list', UsersController::class);
+Route::resource('user/member', MemberController::class);
+Route::get('transaksi/payment/{transaction}', [TransactionController::class, 'payment'])->name('transaksi.payment.member');

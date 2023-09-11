@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PaketRequest;
 use Illuminate\Support\Str;
 use App\Models\Paket;
+use App\Models\TypeActivation;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,9 @@ class PaketController extends Controller
     public function index()
     {
 
-        return view('templates.pages.paket.index');
+        return view('templates.pages.paket.index',[
+            'aktivasi' => TypeActivation::get()
+        ]);
     }
 
     /**

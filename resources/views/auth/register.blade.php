@@ -109,6 +109,10 @@
                                     </select>
                                 </div>
                                 <div class="mb-3">
+                                    <label for="Address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" name="address" value="{{ old('address') }}" placeholder="Enter your Address" required style="resize: none"></textarea>
+                                </div>
+                                <div class="mb-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms">
                                         <label class="form-check-label" for="terms-conditions">
