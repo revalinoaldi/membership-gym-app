@@ -66,6 +66,18 @@
                         <h4 class="mb-1 pt-2">Welcome to NFC-APP! 👋</h4>
                         <p class="mb-4">Please sign-in to your account and start the Gym</p>
 
+                        @if (session('success'))
+                            <div class="alert alert-success alert-dismissible shadow" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @elseif (session('error'))
+                            <div class="alert alert-danger alert-dismissible shadow" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        @endif
+
                         <form id="formAuthentication" class="mb-3" action="{{ route('login.member') }}" method="POST">
                             @csrf
                             <div class="mb-3">

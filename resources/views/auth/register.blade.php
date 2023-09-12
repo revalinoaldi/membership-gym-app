@@ -77,7 +77,18 @@
                             <h4 class="mb-1 pt-2">Adventure starts here 🚀</h4>
                             <p class="mb-4">Make your app management easy and fun!</p>
 
-                            <form id="formAuthentication" class="mb-3" action="#" method="POST">
+                            @if($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form id="formAuthentication" class="mb-3" action="{{ route('register.member') }}" method="POST">
+                                @csrf
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Full Name</label>
                                     <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Enter your Full Name" autofocus required>
@@ -110,7 +121,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="Address" class="form-label">Address</label>
-                                    <textarea class="form-control" id="address" name="address" value="{{ old('address') }}" placeholder="Enter your Address" required style="resize: none"></textarea>
+                                    <textarea class="form-control" id="address" name="alamat" value="{{ old('address') }}" placeholder="Enter your Address" required style="resize: none"></textarea>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check">

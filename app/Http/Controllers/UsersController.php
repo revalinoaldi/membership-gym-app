@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Fortify\Rules\Password;
 
 class UsersController extends Controller
 {
@@ -37,14 +38,13 @@ class UsersController extends Controller
                 'password' => $request->password
             ])->json();
 
-            if(empty($user['result'])){
+
+            if(!$user['result']){
                 throw new Exception("Username or Password is incorrect, please try again.");
             }
 
-            dd($user);
-
             $credentials = request(['email', 'password']);
-            if (!Auth::attempt($credentials)) {
+            if (!Auth::attempt($credentials, $request->boolean('remember'))) {
                 throw new Exception("Username or Password is incorrect, please try again.");
             }
 
@@ -54,18 +54,20 @@ class UsersController extends Controller
 
             Session::put('token', $user['data']['access_token']);
 
+
             return redirect()->route('home')->with('success', 'Success login');
 
-        } catch (Exception $error) {
-            return response()->json([
-                'message' => 'Authentication Error!',
-                'error' => $error->getMessage(),
-            ], 500);
+        } catch (Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage());
+            // return response()->json([
+            //     'message' => 'Authentication Error!',
+            //     'error' => $error->getMessage(),
+            // ], 500);
         }
     }
 
     public function setLogout(Request $request){
-        Auth::logout();
+        // Auth::logout();
 
         $user = Http::withHeaders([
             'Authorization' => 'Bearer '.Session::get('token'),
@@ -77,6 +79,48 @@ class UsersController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login');
+    }
+
+    public function setRegister(Request $request){
+        $valid = [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', new Password],
+            'isMember' => ['required']
+        ];
+        $valid['jenis_kelamin'] = 'required';
+        $valid['alamat'] = 'required';
+        $valid['no_telp'] = 'required';
+
+        $validator = Validator::make($request->all(), $valid, [
+            'email.unique' => 'Email already exist'
+        ]);
+        if($validator->fails()){
+            return redirect()->back()->withErrors($validator->errors());
+        }
+
+        try {
+            $user = Http::post(url('api/register'), $request->all())->json();
+
+            if(!$user['result']){
+                throw new Exception($user['message']);
+            }
+
+            $credentials = $request->only('email', 'password');
+            if (!Auth::attempt($credentials, true)) {
+                throw new Exception("Username or Password is incorrect, please try again.");
+            }
+
+            if ( ! Hash::check($request->password, $user['password'], [])) {
+                throw new Exception('Invalid Credentials');
+            }
+
+            Session::put('token', $user['data']['access_token']);
+
+            return redirect()->route('home')->with('success', 'Success login');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
     }
 
     /**
