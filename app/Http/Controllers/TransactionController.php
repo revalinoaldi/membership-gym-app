@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TransactionsRequest;
 use App\Models\IsMembership;
+use App\Models\Membership;
 use App\Models\Paket;
 use App\Models\TransactionMembership;
 use App\Models\TypeActivation;
@@ -259,6 +260,7 @@ class TransactionController extends Controller
 
         // Cari transaksi berdasarkan ID
         $transaction = TransactionMembership::where('kode_transaksi', $order_id)->firstOrFail();
+        $membership = Membership::where('id', $transaction->membership_id)->firstOrFail();
 
         $callback = [
             'trans_callback' => $notification
@@ -278,6 +280,8 @@ class TransactionController extends Controller
         else if ($status == 'settlement'){
             $callback['status'] = 'SUCCESS';
             $transaction->paid_status = '1';
+            $membership->paket_id = $transaction->paket_id;
+            $membership->expired_date = Carbon::now()->add($transaction->paket->masa_aktif, $transaction->paket->activation->type)->format('Y-m-d H:i:s');
         }
         else if($status == 'pending'){
             $callback['status'] = 'PENDING';
@@ -295,6 +299,7 @@ class TransactionController extends Controller
         $transaction->remark = $notification;
         // Simpan transaksi
         $transaction->save();
+        $membership->save();
 
         // Kirimkan email
         if ($transaction)
