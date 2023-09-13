@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware([
     'auth:sanctum',
+    'web',
     config('jetstream.auth_session'),
     'verified'
 ])->group(function () {
@@ -30,7 +31,7 @@ Route::middleware([
         return view('welcome');
     });
 
-    Route::post('membership/logout', [UsersController::class, 'setLogout'])->name('logout.member');
+    Route::post('member/logout', [UsersController::class, 'setLogout'])->name('logout.member');
 
     Route::get('/home', function () {
         return view('templates.pages.dashboard');

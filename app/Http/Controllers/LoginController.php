@@ -119,7 +119,19 @@ class LoginController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
+            $credentials = request(['email', 'password']);
+            if (!Auth::attempt($credentials)) {
+                return response()->json([
+                    'result' => false,
+                    'message' => 'Unauthorized! Authentication Failed!',
+                    'data' => []
+                ], 500);
+            }
+
             $user = User::where('email', $request->email)->first();
+            if ( ! Hash::check($request->password, $user->password, [])) {
+                throw new \Exception('Invalid Credentials');
+            }
 
             $tokenResult = $user->createToken('authToken')->plainTextToken;
 

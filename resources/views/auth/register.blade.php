@@ -78,13 +78,13 @@
                             <p class="mb-4">Make your app management easy and fun!</p>
 
                             @if($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul>
+                            <div class="alert alert-danger">
+                                <ul>
                                     @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
+                                    <li>{{ $error }}</li>
                                     @endforeach
-                                    </ul>
-                                </div>
+                                </ul>
+                            </div>
                             @endif
 
                             <form id="formAuthentication" class="mb-3" action="{{ route('register.member') }}" method="POST">
@@ -122,6 +122,13 @@
                                 <div class="mb-3">
                                     <label for="Address" class="form-label">Address</label>
                                     <textarea class="form-control" id="address" name="alamat" value="{{ old('address') }}" placeholder="Enter your Address" required style="resize: none"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="paket_id" class="form-label">Choose Paket</label>
+                                    <select name="paket_id" id="paket_id" class="form-select" required>
+                                        <option value="-" hidden selected>Select One</option>
+                                    </select>
+                                    <input type="number" name="total_biaya" id="total_biaya" readonly required hidden>
                                 </div>
                                 <div class="mb-3">
                                     <div class="form-check">
@@ -178,7 +185,29 @@
 
         <!-- Page JS -->
         <script src="/assets/js/pages-auth.js"></script>
+        <script>
+            $(document).ready(async () => {
+                @php
+                    if(@auth()->guard('web')->user()){
+                        echo "window.location.href='".url('/home')."'";
+                    }
+                @endphp
 
+                await $.get(`{!! url('api/paket/list') !!}`, (res) => {
+                    let optionHtml = ''
+                    res.data.map((item) => {
+                        let currency = new Intl.NumberFormat("id-ID").format(item.harga)
+                        optionHtml += `<option value="${item.id}" data-total="${item.harga}">${item.nama_paket} (Rp${currency})</option>`
+                    })
+                    $('#paket_id').append(optionHtml)
+                })
+
+                $('#paket_id').on('change', () => {
+                    const total = $('#paket_id option:selected').attr('data-total')
+                    $('#total_biaya').val(total)
+                })
+            });
+        </script>
     </body>
 
 
