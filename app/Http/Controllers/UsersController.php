@@ -67,7 +67,7 @@ class UsersController extends Controller
     }
 
     public function setLogout(Request $request){
-        // Auth::logout();
+        Auth::guard('web')->logout();
 
         $user = Http::withHeaders([
             'Authorization' => 'Bearer '.Session::get('token'),
@@ -84,10 +84,13 @@ class UsersController extends Controller
     public function setRegister(Request $request){
         $valid = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', new Password],
-            'isMember' => ['required']
+            'isMember' => ['required'],
+            'paket_id' => ['required'],
+            'total_biaya' => ['required']
         ];
+
         $valid['jenis_kelamin'] = 'required';
         $valid['alamat'] = 'required';
         $valid['no_telp'] = 'required';
@@ -100,26 +103,34 @@ class UsersController extends Controller
         }
 
         try {
-            $user = Http::post(url('api/register'), $request->all())->json();
+            $user = Http::post(url('api/register'), $request->except(['paket_id', 'total_biaya']))->json();
+            // dd($user);
 
             if(!$user['result']){
                 throw new Exception($user['message']);
             }
 
             $credentials = $request->only('email', 'password');
-            if (!Auth::attempt($credentials, true)) {
+            if (!Auth::guard('web')->attempt($credentials, true)) {
                 throw new Exception("Username or Password is incorrect, please try again.");
             }
 
-            if ( ! Hash::check($request->password, $user['password'], [])) {
-                throw new Exception('Invalid Credentials');
-            }
+            $trans = Http::withHeaders([
+                'Authorization' => 'Bearer '.$user['data']['access_token'],
+                'Content-Type' => 'application/json'
+            ])->post(url('api/membership/checkout'), [
+                'paket_id' => $request->paket_id,
+                'total_biaya' => $request->total_biaya,
+                'type' => 1
+            ])->json();
 
             Session::put('token', $user['data']['access_token']);
 
             return redirect()->route('home')->with('success', 'Success login');
         } catch (Exception $error) {
-            return redirect()->back()->withErrors($error->getMessage());
+            // dd($error);
+            return response()->json($error->getMessage(), 400);
+            // return redirect()->back()->withErrors($error->getMessage());
         }
     }
 

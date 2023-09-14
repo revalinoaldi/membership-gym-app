@@ -147,7 +147,15 @@
 
     <!-- Page JS -->
     <script src="/assets/js/pages-auth.js"></script>
-
+    <script>
+        $(document).ready(() => {
+            @php
+                if(@auth()->user()){
+                    echo "window.location.href='".url('/home')."'";
+                }
+            @endphp
+        })
+    </script>
 </body>
 
 </html>

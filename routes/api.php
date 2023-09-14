@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [LoginController::class, 'login']);
 Route::post('register', [LoginController::class, 'register']);
+Route::get('paket/list', [PaketController::class, 'list']);
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', [LoginController::class, 'fetch']);
@@ -27,6 +29,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [LoginController::class, 'logout']);
 
     // Modul Paket
+
     Route::get('membership/paket', [PaketController::class, 'list']);
     Route::get('membership/paket/{paket}', [PaketController::class, 'show']);
     Route::post('membership/paket', [PaketController::class, 'store']);
