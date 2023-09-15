@@ -9,6 +9,8 @@ use App\Models\TypeActivation;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PaketController extends Controller
@@ -21,10 +23,21 @@ class PaketController extends Controller
      */
     public function index()
     {
+        try {
+            $paket = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->get(url('api/membership/paket/'))->throw()->json();
 
-        return view('templates.pages.paket.index',[
-            'aktivasi' => TypeActivation::get()
-        ]);
+            // dd($paket);
+            return view('templates.pages.paket.index',[
+                'pakets' => $paket['data'],
+                'aktivasi' => TypeActivation::get()
+            ]);
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+
     }
 
     /**

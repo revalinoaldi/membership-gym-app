@@ -36,7 +36,7 @@ class UsersController extends Controller
             $user = Http::post(url('api/login'), [
                 'email' => $request->email,
                 'password' => $request->password
-            ])->json();
+            ])->throw()->json();
 
 
             if(!$user['result']){
@@ -48,16 +48,19 @@ class UsersController extends Controller
                 throw new Exception("Username or Password is incorrect, please try again.");
             }
 
-            if ( ! Hash::check($request->password, $user['password'], [])) {
-                throw new Exception('Invalid Credentials');
-            }
-
             Session::put('token', $user['data']['access_token']);
 
-
+            if(empty(Session::get('token'))){
+                throw new Exception("Something when wrong.");
+            }
             return redirect()->route('home')->with('success', 'Success login');
 
         } catch (Exception $e) {
+            Auth::guard('web')->logout();
+
+            $request->session()->invalidate();
+
+            $request->session()->regenerateToken();
             return redirect()->back()->withErrors($e->getMessage());
             // return response()->json([
             //     'message' => 'Authentication Error!',
@@ -122,9 +125,12 @@ class UsersController extends Controller
                 'paket_id' => $request->paket_id,
                 'total_biaya' => $request->total_biaya,
                 'type' => 1
-            ])->json();
+            ])->throw()->json();
 
             Session::put('token', $user['data']['access_token']);
+            if(empty(Session::get('token'))){
+                throw new Exception("Something when wrong.");
+            }
 
             return redirect()->route('home')->with('success', 'Success login');
         } catch (Exception $error) {
