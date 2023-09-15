@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/assets/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css">
     <link rel="stylesheet" href="/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css">
     <link rel="stylesheet" href="/assets/vendor/libs/flatpickr/flatpickr.css" />
+    <link rel="stylesheet" href="/assets/vendor/libs/sweetalert2/sweetalert2.css" />
     <!-- Row Group CSS -->
     <link rel="stylesheet" href="/assets/vendor/libs/datatables-rowgroup-bs5/rowgroup.bootstrap5.css">
     <!-- Form Validation -->
@@ -32,44 +33,30 @@
                             <th>Harga</th>
                             <th>Deskripsi</th>
                             <th>Masa Aktif</th>
+                            <th>Tipe</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @foreach ($pakets as $paket)
+
                         <tr>
-                            <td>1.</td>
-                            <td>Paket Harian</td>
-                            <td>Rp250.000</td>
-                            <td>Paket Harian + Instruktur Gym</td>
-                            <td>1 Days</td>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>{{ $paket['nama_paket'] }}</td>
+                            <td>Rp{{ number_format($paket['harga'], 0, ',', '.') }}</td>
+                            <td>{{ $paket['deskripsi'] }}</td>
+                            <td>{{ $paket['masa_aktif'] }} {{ $paket['activation']['type'] }}</td>
+                            <td>{{ $paket['activation']['description'] }}</td>
                             <td>
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge bg-{{ $paket['deleted_at'] == NULL ? "success" : "danger" }}">{{ $paket['deleted_at'] == NULL ? "Active" : "Not Active" }}</span>
                             </td>
-                            <td>#</td>
-                        </tr>
-                        <tr>
-                            <td>2.</td>
-                            <td>Paket Mingguan</td>
-                            <td>Rp350.000</td>
-                            <td>Paket Mingguan + Instruktur Gym</td>
-                            <td>7 Days</td>
                             <td>
-                                <span class="badge bg-success">Active</span>
+                                <button type="button" class="btn btn-primary btn-edit" data-id="{{ $paket['slug'] }}" title="edit"><i class="ti ti-pencil me-sm-1"></i></button>
+                                <button type="button" class="btn btn-danger btn-destroy" data-id="{{ $paket['slug'] }}" title="delete"><i class="ti ti-trash me-sm-1"></i></button>
                             </td>
-                            <td>#</td>
                         </tr>
-                        <tr>
-                            <td>3.</td>
-                            <td>Paket Bulanan</td>
-                            <td>Rp600.000</td>
-                            <td>Paket Mingguan + Instruktur Gym + Soft Drink</td>
-                            <td>1 Month</td>
-                            <td>
-                                <span class="badge bg-success">Active</span>
-                            </td>
-                            <td>#</td>
-                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -136,6 +123,9 @@
     <script src="/assets/vendor/libs/%40form-validation/umd/plugin-bootstrap5/index.min.js"></script>
     <script src="/assets/vendor/libs/%40form-validation/umd/plugin-auto-focus/index.min.js"></script>
     {{-- <script src="/assets/js/tables-datatables-basic.js"></script> --}}
+
+    <!-- Vendors JS -->
+    <script src="/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
 
     <script>
         let fv, offCanvasEl;
@@ -207,7 +197,9 @@
                 }
             })
         }), $(function() {
+
         })
+        // function
         $(".datatables-basic").DataTable({
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             // displayLength: 7,
