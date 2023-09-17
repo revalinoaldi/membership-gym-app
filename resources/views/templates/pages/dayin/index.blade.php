@@ -49,7 +49,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
                                 <div>
-                                    <h3 class="mb-1">{{ $allTotal }}</h3>
+                                    <h3 class="mb-1">{{ @$allTotal }}</h3>
                                     <p class="mb-0">Total Report Checkin Dayin</p>
                                 </div>
                                 <span class="avatar me-sm-4">
@@ -62,7 +62,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
                                 <div>
-                                    <h3 class="mb-1">{{ $totalToday->kunjungan->count() }}</h3>
+                                    <h3 class="mb-1">{{ @$totalToday->kunjungan->count() }}</h3>
                                     <p class="mb-0">Total Member Checkin Today</p>
                                 </div>
                                 <span class="avatar me-sm-4">
@@ -73,7 +73,7 @@
                         <div class="col-sm-6 col-lg-6">
                             <div class="d-flex justify-content-between align-items-start card-widget-2 pb-3 pb-sm-0">
                                 <div>
-                                    <h3 class="mb-1">{{ $totalToday->kode_kunjungan }}</h3>
+                                    <h3 class="mb-1">{{ @$totalToday->kode_kunjungan }}</h3>
                                     <p class="mb-0">Kode Checkin Today</p>
                                 </div>
                                 <span class="avatar me-lg-4">
