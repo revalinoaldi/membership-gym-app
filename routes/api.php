@@ -20,12 +20,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('login', [LoginController::class, 'login']);
 Route::post('register', [LoginController::class, 'register']);
-Route::get('paket/list', [PaketController::class, 'list']);
+Route::get('paket/list', [PaketController::class, 'listForMember']);
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('profile', [LoginController::class, 'fetch']);
-    Route::post('profile', [LoginController::class, 'updateProfile']);
+    Route::post('profile/update', [LoginController::class, 'updateProfile']);
     Route::post('logout', [LoginController::class, 'logout']);
 
     // Modul Paket
@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('membership/paket', [PaketController::class, 'store']);
     Route::post('membership/paket/{paket}/update', [PaketController::class, 'update']);
     Route::delete('membership/paket/{paket}', [PaketController::class, 'destroy']);
+    Route::post('membership/paket/{paket}/restore', [PaketController::class, 'restore']);
 
     // Modul Paket
     Route::get('membership/list', [MembershipController::class, 'list']);
@@ -45,7 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Modul Transaction
     Route::get('membership/transaction', [TransactionController::class, 'list']);
-    Route::get('membership/checkout/{transaction}', [TransactionController::class, 'show']);
+    Route::get('membership/checkout/{transaction}', [TransactionController::class, 'listOne']);
     Route::post('membership/checkout', [TransactionController::class, 'store']);
 
     Route::post('membership/checkout/{transaction}/cancel', [TransactionController::class, 'cancleTransaction']);

@@ -22,20 +22,41 @@
         <h4 class="py-3 mb-4">
             <span class="text-muted fw-light">Memberships /</span> Paket
         </h4>
+        @if (session('success'))
+        <div class="alert alert-success alert-dismissible shadow" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if ($errors->any())
+        <div class="mb-3">
+            <div class="alert alert-danger alert-dismissible alert-solid alert-label-icon shadow fade show mb-xl-0" role="alert">
+                <i class="ri-error-warning-line label-icon"></i><strong>{{ __('Whoops! Something went wrong.') }}</strong>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li> {{ $error }} </li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        @endif
+        {{-- Error Start --}}
         <!-- DataTable with Buttons -->
         <div class="card">
             <div class="card-datatable table-responsive pt-0">
                 <table class="datatables-basic table">
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Jenis Paket</th>
-                            <th>Harga</th>
-                            <th>Deskripsi</th>
-                            <th>Masa Aktif</th>
-                            <th>Tipe</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Jenis Paket</th>
+                            <th class="text-center">Harga</th>
+                            <th class="text-center">Deskripsi</th>
+                            <th class="text-center">Masa Aktif</th>
+                            <th class="text-center">Tipe</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -44,16 +65,27 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $paket['nama_paket'] }}</td>
-                            <td>Rp{{ number_format($paket['harga'], 0, ',', '.') }}</td>
+                            <td class="text-end">Rp{{ number_format($paket['harga'], 0, ',', '.') }}</td>
                             <td>{{ $paket['deskripsi'] }}</td>
-                            <td>{{ $paket['masa_aktif'] }} {{ $paket['activation']['type'] }}</td>
-                            <td>{{ $paket['activation']['description'] }}</td>
+                            <td class="text-center">{{ $paket['masa_aktif'] }} {{ $paket['activation']['type'] }}</td>
+                            <td class="text-center">{{ $paket['activation']['description'] }}</td>
                             <td>
                                 <span class="badge bg-{{ $paket['deleted_at'] == NULL ? "success" : "danger" }}">{{ $paket['deleted_at'] == NULL ? "Active" : "Not Active" }}</span>
                             </td>
-                            <td>
-                                <button type="button" class="btn btn-primary btn-edit" data-id="{{ $paket['slug'] }}" title="edit"><i class="ti ti-pencil me-sm-1"></i></button>
-                                <button type="button" class="btn btn-danger btn-destroy" data-id="{{ $paket['slug'] }}" title="delete"><i class="ti ti-trash me-sm-1"></i></button>
+                            <td class="text-center">
+                                @if ($paket['deleted_at'] == null)
+                                <a class="btn btn-primary btn-edit" href="{{ route('paket.edit', $paket['slug']) }}" title="edit"><i class="ti ti-pencil me-sm-1"></i></a>
+                                <form action="{{ route('delete.paket', $paket['slug']) }}" method="POST" style="display: inline">
+                                    @csrf
+                                    @method('delete')
+                                    <button onclick="return confirm('You sure delete this data?');" type="submit" class="btn btn-danger btn-destroy" data-id="{{ $paket['slug'] }}" title="delete"><i class="ti ti-trash me-sm-1"></i></button>
+                                </form>
+                                @else
+                                <form action="{{ route('restore.paket', $paket['slug']) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" title="Restore Data" onclick="return confirm('You sure restore this data?');" class="btn btn-primary btn-icon waves-effect waves-light"><i class="ti ti-arrow-back me-sm-1"></i></button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -69,12 +101,14 @@
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body flex-grow-1">
-                <form class="add-new-record pt-0 row g-2" id="form-add-new-record" onsubmit="return false">
+                <form class="add-new-record pt-0 row g-2" id="form-add-new-record" method="post" action="{{ route('save.paket') }}">
+                    @csrf
                     <div class="col-sm-12">
                         <label class="form-label" for="nama_paket">Nama Paket</label>
                         <div class="input-group input-group-merge">
                             <span id="nama_paket2" class="input-group-text"><i class='ti ti-briefcase'></i></span>
                             <input type="text" id="nama_paket" class="form-control dt-paket-name" name="nama_paket" placeholder="Nama Paket" aria-label="Nama Paket" aria-describedby="nama_paket2" />
+                            <input type="text" id="slug" name="slug" readonly required hidden>
                         </div>
                     </div>
                     <div class="col-sm-12">
@@ -97,13 +131,13 @@
                             <select name="type_activation_id" id="type_activation_id" class="form-select dt-type-activation">
                                 <option value="" hidden>-- Select One --</option>
                                 @foreach ($aktivasi as $item)
-                                    <option value="{{ $item->id }}">{{ $item->description }}</option>
+                                <option value="{{ $item->id }}">{{ $item->description }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="col-sm-12">
-                        <button type="submit" class="btn btn-primary data-submit me-sm-3 me-1">Submit</button>
+                        <button type="submit" name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1">Submit</button>
                         <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
                     </div>
                 </form>
@@ -131,18 +165,22 @@
         let fv, offCanvasEl;
         document.addEventListener("DOMContentLoaded", function(e) {
             var t;
-            t = document.getElementById("form-add-new-record"), setTimeout(() => {
+
+            t = document.getElementById("form-add-new-record"),
+            setTimeout(() => {
                 const e = document.querySelector(".create-new"),
                 t = document.querySelector("#add-new-record");
                 e && e.addEventListener("click", function() {
                     offCanvasEl = new bootstrap.Offcanvas(t),
-                        t.querySelector(".dt-paket-name").value = "",
-                        t.querySelector(".dt-salary").value = "",
-                        t.querySelector(".dt-description").value = "",
-                        t.querySelector(".dt-activation").value = "",
-                        t.querySelector(".dt-type-activation").value = "",
+                    t.querySelector(".dt-paket-name").value = "",
+                    t.querySelector(".dt-salary").value = "",
+                    t.querySelector(".dt-description").value = "",
+                    t.querySelector(".dt-activation").value = "",
+                    t.querySelector(".dt-type-activation").value = "",
                     offCanvasEl.show()
-                })
+                });
+
+
             }, 200), fv = FormValidation.formValidation(t, {
                 fields: {
                     nama_paket: {
@@ -188,16 +226,17 @@
                         rowSelector: ".col-sm-12"
                     }),
                     submitButton: new FormValidation.plugins.SubmitButton,
+                    defaultSubmit: new FormValidation.plugins.DefaultSubmit,
                     autoFocus: new FormValidation.plugins.AutoFocus
                 },
                 init: e => {
                     e.on("plugins.message.placed", function(e) {
-                        e.element.parentElement.classList.contains("input-group") && e.element.parentElement.insertAdjacentElement("afterend", e.messageElement)
+                        e.element.parentElement.classList.contains("input-group") &&
+                        e.element.parentElement.insertAdjacentElement("afterend", e.messageElement)
                     })
                 }
             })
         }), $(function() {
-
         })
         // function
         $(".datatables-basic").DataTable({
@@ -212,80 +251,46 @@
                     extend: "print",
                     text: '<i class="ti ti-printer me-1" ></i>Print',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // },
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6],
+                    },
                     customize: function(e) {
-                        $(e.document.body).css("color", config.colors.headingColor).css("border-color", config.colors.borderColor).css("background-color", config.colors.bodyBg), $(e.document.body).find("table").addClass("compact").css("color", "inherit").css("border-color", "inherit").css("background-color", "inherit")
+                        $(e.document.body).css("color", config.colors.headingColor)
+                        .css("border-color", config.colors.borderColor)
+                        .css("background-color", config.colors.bodyBg), $(e.document.body)
+                        .find("table").addClass("compact")
+                        .css("color", "inherit")
+                        .css("border-color", "inherit")
+                        .css("background-color", "inherit")
                     }
                 }, {
                     extend: "csv",
                     text: '<i class="ti ti-file-text me-1" ></i>Csv',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6],
+                    }
                 }, {
                     extend: "excel",
                     text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6],
+                    }
                 }, {
                     extend: "pdf",
                     text: '<i class="ti ti-file-description me-1"></i>Pdf',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6],
+                    }
                 }, {
                     extend: "copy",
                     text: '<i class="ti ti-copy me-1" ></i>Copy',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6],
+                    }
                 }]
             }, {
                 text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',

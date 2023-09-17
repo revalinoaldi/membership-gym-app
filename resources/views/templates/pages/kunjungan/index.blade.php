@@ -19,7 +19,7 @@
 
     <div class="row">
         <h4 class="py-3 mb-4">
-            <span class="text-muted fw-light">Memberships /</span> Day In Gym
+            <span class="text-muted fw-light">Memberships /</span> Kunjungan
         </h4>
         <!-- DataTable with Buttons -->
         @if (session('success'))
@@ -42,47 +42,58 @@
             </div>
         </div>
         @endif
+
         <div class="card mb-4">
             <div class="card-widget-separator-wrapper">
+                <div class="card-header">
+                    <h5>Today Checkin</h5>
+                    @if (auth()->user()->is_member->member->status = "NON ACTIVE" || (\Carbon\Carbon::now() > \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)))
+                        <div class="alert alert-danger alert-dismissible shadow" role="alert">
+                            User is Not Active! You can't do it checkin gym!
+                        </div>
+                    @endif
+                </div>
                 <div class="card-body card-widget-separator">
-                    <div class="row gy-4 gy-sm-1">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
-                                <div>
-                                    <h3 class="mb-1">{{ $allTotal }}</h3>
-                                    <p class="mb-0">Total Report Checkin Dayin</p>
-                                </div>
-                                <span class="avatar me-sm-4">
-                                    <span class="avatar-initial bg-label-primary rounded"><i class="ti ti-user ti-md"></i></span>
-                                </span>
+                    @if (empty($today->id))
+                        <form id="formCheckin" class="mb-3 px-4" action="{{ route('kunjungan.store') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="kode_dayin" class="form-label">Today Code</label>
+                                <input type="number" class="form-control" id="kode_dayin" name="kode_dayin" value="{{ old('kode_dayin') }}" placeholder="Enter Code Day In" required>
+                                <small class="text-muted">You can ask in cashier</small>
                             </div>
-                            <hr class="d-none d-sm-block d-lg-none me-4">
+                            <button class="btn btn-primary d-grid w-100" type="submit">
+                                Check In
+                            </button>
+                        </form>
+                    @else
+                        <div class="alert alert-success alert-dismissible shadow" role="alert">
+                            Today is Already Checkin{{ @$today->checkout_time ? "/Checkout" : "" }}!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
+                        <form id="formCheckin" class="mb-3 px-4" action="{{ route('kunjungan.update', $today->id) }}" method="POST">
+                            @csrf
+                            @method('put')
+                            <div class="mb-3">
+                                <label for="timeCheckin" class="form-label">Checkin Time</label>
+                                @php($tgl = \Carbon\Carbon::parse($today->kunjungan->datein)->format('d M Y')." ".\Carbon\Carbon::parse($today->checkin_time)->format('H:i:s'))
+                                <input type="text" class="form-control" id="timeCheckin" name="timeCheckin" value="{{ $tgl }}" placeholder="Enter Code Day In" readonly disabled>
+                            </div>
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
-                                <div>
-                                    <h3 class="mb-1">{{ $totalToday->kunjungan->count() }}</h3>
-                                    <p class="mb-0">Total Member Checkin Today</p>
+                            @if (@$today->checkout_time)
+                                <div class="mb-3">
+                                    <label for="timeCheckOut" class="form-label">Checkin Time</label>
+                                    @php($tglOut = \Carbon\Carbon::parse($today->kunjungan->datein)->format('d M Y')." ".\Carbon\Carbon::parse($today->checkout_time)->format('H:i:s'))
+                                    <input type="text" class="form-control" id="timeCheckOut" name="timeCheckOut" value="{{ $tglOut }}" placeholder="Enter Code Day In" readonly disabled>
                                 </div>
-                                <span class="avatar me-sm-4">
-                                    <span class="avatar-initial bg-label-success rounded"><i class="ti ti-checks ti-md"></i></span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-6">
-                            <div class="d-flex justify-content-between align-items-start card-widget-2 pb-3 pb-sm-0">
-                                <div>
-                                    <h3 class="mb-1">{{ $totalToday->kode_kunjungan }}</h3>
-                                    <p class="mb-0">Kode Checkin Today</p>
-                                </div>
-                                <span class="avatar me-lg-4">
-                                    <span class="avatar-initial bg-label-info rounded"><i class="ti ti-lock ti-md"></i></span>
-                                </span>
-                            </div>
-                        </div>
+                            @else
+                                <button class="btn btn-primary d-grid w-100" type="submit">
+                                    Check Out
+                                </button>
+                            @endif
+                        </form>
+                    @endif
 
-                    </div>
                 </div>
             </div>
         </div>
@@ -92,22 +103,27 @@
                 <table class="datatables-basic table">
                     <thead>
                         <tr>
-                            <th>Kode Day In</th>
-                            <th>Tanggal Dayin</th>
-                            <th>Total Member Checkin</th>
-                            {{-- <th>Action</th> --}}
+                            <th>#</th>
+                            <th>Tgl Kunjungan</th>
+                            <th>Waktu Checkin</th>
+                            <th>Waktu Checkout</th>
+                            <th>Status</th>
+                            <th>Penjaga</th>
+                            {{-- <th class="cell-fit">Actions</th> --}}
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($dayins as $item)
+                        @foreach ($checklist as $check)
                             <tr>
-                                <td><a href="#">{{ $item->kode_kunjungan }}</a></td>
-                                <th>{{ \Carbon\Carbon::parse($item->datein)->format('d M Y') }}</th>
-                                <td>{{ $item->kunjungan->count() }} Member</td>
-                                {{-- <td>#</td> --}}
+                                <td>#{{ $check->transaction_code }}</td>
+                                <td>{{ \Carbon\Carbon::parse($check->kunjungan->datein)->format('d M Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($check->checkin_time)->format('H:i:s') }}</td>
+                                <td>{{ isset($check->checkout_time) ? \Carbon\Carbon::parse($check->checkout_time)->format('H:i:s') : '' }}</td>
+                                <td>{{ $check->status }}</td>
+                                <td>{{ $check->users->name }}</td>
                             </tr>
                         @endforeach
-                    </tbody>
+                     </tbody>
                 </table>
             </div>
         </div>
@@ -187,13 +203,6 @@
                     text: '<i class="ti ti-copy me-1" ></i>Copy',
                     className: "dropdown-item",
                 }]
-            }, {
-                text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                className: "btn btn-primary add-new",
-                attr: {
-                    "data-bs-toggle":"modal",
-                    "data-bs-target":"#modalCenter"
-                }
             }],
             responsive: {
                 details: {

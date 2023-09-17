@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
@@ -11,7 +12,11 @@ class MemberController extends Controller
      */
     public function index()
     {
-        return view('templates.pages.member.index');
+        return view('templates.pages.member.index',[
+            'users' => User::with('is_member')->whereHas('roles', function($q){
+                return $q->whereNotIn('name', ['ADMINISTRATOR', 'KASIR']);
+            })->latest()->get()
+        ]);
     }
 
     /**

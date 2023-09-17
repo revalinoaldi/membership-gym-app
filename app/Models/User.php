@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -79,6 +80,12 @@ class User extends Authenticatable
     public function kunjungan_member(){
         return $this->hasMany(KunjunganMember::class, 'user_id', 'id');
     }
+
+    public function getRouteKeyName()
+    {
+        return 'email';
+    }
+
 
     // public function getJWTIdentifier()
     // {

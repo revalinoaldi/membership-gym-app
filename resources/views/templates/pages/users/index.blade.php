@@ -19,8 +19,30 @@
 
     <div class="row">
         <h4 class="py-3 mb-4">
-            <span class="text-muted fw-light">Memberships /</span> Users
+            <span class="text-muted fw-light">Administrator /</span> Users
         </h4>
+
+        @if (session('success'))
+        <div class="alert alert-success alert-dismissible shadow" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        @if ($errors->any())
+        <div class="mb-3">
+            <div class="alert alert-danger alert-dismissible alert-solid alert-label-icon shadow fade show mb-xl-0" role="alert">
+                <i class="ri-error-warning-line label-icon"></i><strong>{{ __('Whoops! Something went wrong.') }}</strong>
+                <ul>
+                    @foreach ($errors->all() as $error)
+                    <li> {{ $error }} </li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        @endif
+        {{-- Error Start --}}
         <!-- DataTable with Buttons -->
         <div class="card">
             <div class="card-datatable table-responsive pt-0">
@@ -35,36 +57,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>ADMINISTRATOR</td>
-                            <td>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                <button class="btn btn-primary"><i class="fas fa-pencil"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>KASIR</td>
-                            <td>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                <button class="btn btn-primary"><i class="fas fa-pencil"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>KASIR</td>
-                            <td>
-                                <button class="btn btn-danger"><i class="fas fa-trash"></i></button>
-                                <button class="btn btn-primary"><i class="fas fa-pencil"></i></button>
-                            </td>
-                        </tr>
+                        @foreach ($users as $user)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $user->name }}</td>
+                                <th>{{ $user->email }}</th>
+                                <td>{{ $user->roles()->pluck('name')[0] }}</td>
+                                <td>
+                                    {{-- <button class="btn btn-danger"><i class="fas fa-trash"></i></button> --}}
+                                    <a href="{{ route('list.edit', $user->email) }}" class="btn btn-primary"><i class="fas fa-pencil"></i></a>
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -85,16 +89,11 @@
     <script>
         $(document).ready(() => {
             $('.add-new').on('click', () => {
-                alert(`Hello World`)
+                window.location.href = `{{ route('list.create') }}`
             })
         })
         $(".datatables-basic").DataTable({
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            // order: [
-            //     [1, "desc"]
-            // ],
-            // displayLength: 7,
-            // lengthMenu: [7, 10, 25, 50, 75, 100],
             buttons: [{
                 extend: "collection",
                 className: "btn btn-label-primary dropdown-toggle me-2",
@@ -103,17 +102,6 @@
                     extend: "print",
                     text: '<i class="ti ti-printer me-1" ></i>Print',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // },
                     customize: function(e) {
                         $(e.document.body).css("color", config.colors.headingColor).css("border-color", config.colors.borderColor).css("background-color", config.colors.bodyBg), $(e.document.body).find("table").addClass("compact").css("color", "inherit").css("border-color", "inherit").css("background-color", "inherit")
                     }
@@ -121,62 +109,18 @@
                     extend: "csv",
                     text: '<i class="ti ti-file-text me-1" ></i>Csv',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "excel",
                     text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "pdf",
                     text: '<i class="ti ti-file-description me-1"></i>Pdf',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "copy",
                     text: '<i class="ti ti-copy me-1" ></i>Copy',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }]
             }, {
                 text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',

@@ -19,7 +19,7 @@
 
     <div class="row">
         <h4 class="py-3 mb-4">
-            <span class="text-muted fw-light">Memberships /</span> Users Member
+            <span class="text-muted fw-light">Memberships /</span> Member Users
         </h4>
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -28,48 +28,34 @@
                     <thead>
                         <tr>
                             <th>No.</th>
+                            <th>Kode Member</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Jenis Kelamin</th>
                             <th>No Telp</th>
                             <th>Alamat</th>
                             <th>Status Member</th>
+                            <th>Tanggal Daftar</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>Laki-Laki</td>
-                            <td>(+62) 8157881923</td>
-                            <td>Bintara</td>
-                            <td>
-                                <span class="badge bg-label-success" text-capitalized> Active</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>Laki-Laki</td>
-                            <td>(+62) 8157881923</td>
-                            <td>Jakarta</td>
-                            <td>
-                                <span class="badge bg-label-success" text-capitalized> Active</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3.</td>
-                            <td>{{ fake()->unique()->name() }}</td>
-                            <th>{{ fake()->unique()->safeEmail() }}</th>
-                            <td>Laki-Laki</td>
-                            <td>(+62) 8157881923</td>
-                            <td>Bandung</td>
-                            <td>
-                                <span class="badge bg-label-secondary" text-capitalized> Not Active </span>
-                            </td>
-                        </tr>
+                        @foreach ($users as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item->is_member->member->kode_member }}</td>
+                                <td>{{ $item->name }}</td>
+                                <th>{{ $item->email }}</th>
+                                <td>{{ $item->is_member->member->jenis_kelamin }}</td>
+                                <td>{{ $item->is_member->member->no_telp }}</td>
+                                <td>{{ $item->is_member->member->alamat }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $item->is_member->member->status == "ACTIVE" ? "label-success" : "label-secondary" }}" text-capitalized> {{ $item->is_member->member->status }}</span>
+                                </td>
+                                <td>
+                                    {{ \Carbon\Carbon::parse($item->is_member->member->tgl_daftar)->format('d M Y') }}
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -95,11 +81,9 @@
         })
         $(".datatables-basic").DataTable({
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            // order: [
-            //     [1, "desc"]
-            // ],
-            // displayLength: 7,
-            // lengthMenu: [7, 10, 25, 50, 75, 100],
+            order: [
+                [8, "desc"]
+            ],
             buttons: [{
                 extend: "collection",
                 className: "btn btn-label-primary dropdown-toggle me-2",
@@ -108,17 +92,6 @@
                     extend: "print",
                     text: '<i class="ti ti-printer me-1" ></i>Print',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // },
                     customize: function(e) {
                         $(e.document.body).css("color", config.colors.headingColor).css("border-color", config.colors.borderColor).css("background-color", config.colors.bodyBg), $(e.document.body).find("table").addClass("compact").css("color", "inherit").css("border-color", "inherit").css("background-color", "inherit")
                     }
@@ -126,67 +99,26 @@
                     extend: "csv",
                     text: '<i class="ti ti-file-text me-1" ></i>Csv',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "excel",
                     text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "pdf",
                     text: '<i class="ti ti-file-description me-1"></i>Pdf',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }, {
                     extend: "copy",
                     text: '<i class="ti ti-copy me-1" ></i>Copy',
                     className: "dropdown-item",
-                    // exportOptions: {
-                    //     columns: [3, 4, 5, 6, 7],
-                    //     format: {
-                    //         body: function(e, t, a) {
-                    //             var s;
-                    //             return e.length <= 0 ? e : (e = $.parseHTML(e), s = "", $.each(e, function(e, t) {
-                    //                 void 0 !== t.classList && t.classList.contains("user-name") ? s += t.lastChild.firstChild.textContent : void 0 === t.innerText ? s += t.textContent : s += t.innerText
-                    //             }), s)
-                    //         }
-                    //     }
-                    // }
                 }]
-            }, {
-                text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                className: "btn btn-primary add-new"
             }],
+            columnDefs: [
+                {
+                    "visible": false,
+                    "targets": [8]
+                }
+            ],
             responsive: {
                 details: {
                     display: $.fn.dataTable.Responsive.display.modal({

@@ -25,7 +25,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
                                 <div>
-                                    <h3 class="mb-1">24</h3>
+                                    <h3 class="mb-1">{{ $member }}</h3>
                                     <p class="mb-0">Members</p>
                                 </div>
                                 <span class="avatar me-sm-4">
@@ -37,7 +37,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start card-widget-2 border-end pb-3 pb-sm-0">
                                 <div>
-                                    <h3 class="mb-1">4</h3>
+                                    <h3 class="mb-1">{{ $invoice }}</h3>
                                     <p class="mb-0">Invoices</p>
                                 </div>
                                 <span class="avatar me-lg-4">
@@ -49,7 +49,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
                                 <div>
-                                    <h3 class="mb-1">Rp3.700.000</h3>
+                                    <h3 class="mb-1">Rp{{ number_format($paid, 0, ',', '.') }}</h3>
                                     <p class="mb-0">Paid</p>
                                 </div>
                                 <span class="avatar me-sm-4">
@@ -60,7 +60,7 @@
                         <div class="col-sm-6 col-lg-3">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h3 class="mb-1">Rp70.000</h3>
+                                    <h3 class="mb-1">Rp{{ number_format($unpaid, 0, ',', '.') }}</h3>
                                     <p class="mb-0">Unpaid</p>
                                 </div>
                                 <span class="avatar">
@@ -87,71 +87,28 @@
                             <th>Total Biaya</th>
                             <th>Status Transaksi</th>
                             <th>Tgl Pembayaran</th>
-                            {{-- <th class="cell-fit">Actions</th> --}}
+                            <th>Expired Date</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            @php($tgl = \Carbon\Carbon::today()->subDays(rand(0, 179))->addSeconds(rand(0, 86400)))
-                            <th>
-                                <a href="{{ route('transaksi.show', mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99)) }}">{{ mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99) }}</a>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                            <th>[{{ mt_rand(100000000,999999999) }}] - {{ fake()->unique()->name() }}</th>
-                            <th>Paket Mingguan</th>
-                            <th>7 Days</th>
-                            <th>Rp350.000</th>
-                            <th>
-                                <span class="badge bg-label-success" text-capitalized> Paid </span>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                        </tr>
-                        <tr>
-                            @php($tgl = \Carbon\Carbon::today()->subDays(rand(0, 179))->addSeconds(rand(0, 86400)))
-                            <th>
-                                <a href="{{ route('transaksi.show', mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99)) }}">{{ mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99) }}</a>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                            <th>[{{ mt_rand(100000000,999999999) }}] - {{ fake()->unique()->name() }}</th>
-                            <th>Paket Bulanan</th>
-                            <th>1 Month</th>
-                            <th>Rp900.000</th>
-                            <th>
-                                <span class="badge bg-label-success" text-capitalized> Paid </span>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                        </tr>
-                        <tr>
-                            @php($tgl = \Carbon\Carbon::today()->subDays(rand(0, 179))->addSeconds(rand(0, 86400))->format('d F Y H:i') )
-                            <th>
-                                <a href="{{ route('transaksi.show', mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99)) }}">{{ mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99) }}</a>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                            <th>[{{ mt_rand(100000000,999999999) }}] - {{ fake()->unique()->name() }}</th>
-                            <th>Paket Tahunan</th>
-                            <th>1 Year</th>
-                            <th>Rp2.450.000</th>
-                            <th>
-                                <span class="badge bg-label-success" text-capitalized> Paid </span>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                        </tr>
-                        <tr>
-                            @php($tgl = \Carbon\Carbon::today()->subDays(rand(0, 179))->addSeconds(rand(0, 86400)))
-                            <th>
-                                <a href="{{ route('transaksi.show', mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99)) }}">{{ mt_rand(1000,9999)."-".mt_rand(1000,9999)."-".mt_rand(100,999)."-".mt_rand(100,999)."-".mt_rand(10,99) }}</a>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                            <th>[{{ mt_rand(100000000,999999999) }}] - {{ fake()->unique()->name() }}</th>
-                            <th>Paket Harian</th>
-                            <th>1 Days</th>
-                            <th>Rp70.000</th>
-                            <th>
-                                <span class="badge bg-label-danger" text-capitalized> Unpaid </span>
-                            </th>
-                            <th>{{ $tgl }}</th>
-                        </tr>
-                    </tbody>
+                        @foreach ($transaksi as $item)
+                            <tr>
+                                <th>
+                                    <a href="{{ route('transaksi.show', $item['kode_transaksi']) }}">{{ $item['kode_transaksi'] }}</a>
+                                </th>
+                                <th>{{ \Carbon\Carbon::parse($item['tgl_transaksi'])->format('d M Y') }}</th>
+                                <th>[{{ $item['membership']['kode_member'] }}] - {{ $item['membership']['nama_lengkap'] }}</th>
+                                <th>{{ $item['paket']['nama_paket'] }}</th>
+                                <th>{{ $item['paket']['masa_aktif'] }} {{ $item['paket']['activation']['type'] }}</th>
+                                <th>Rp{{ number_format($item['total_biaya'], 0, ',', '.') }}</th>
+                                <th>
+                                    <span class="badge bg-{{ $item['paid_status'] == 1 ? "label-success" : "label-danger" }}" text-capitalized> {{ $item['paid_status'] == 1 ? "Paid" : "Unpaid" }} </span>
+                                </th>
+                                <th>{{ @$item['paid_date'] ? \Carbon\Carbon::parse($item['paid_date'])->format('d M Y') : "-" }}</th>
+                                <th>{!! (\Carbon\Carbon::now() > \Carbon\Carbon::parse($item['expired_date'])) ? 'Expired' : \Carbon\Carbon::parse($item['expired_date'])->diffForHumans() !!}</th>
+                            </tr>
+                        @endforeach
+                     </tbody>
                 </table>
             </div>
         </div>

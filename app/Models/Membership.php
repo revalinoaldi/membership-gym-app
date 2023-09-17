@@ -24,7 +24,7 @@ class Membership extends Model
 
     public function transaksi()
     {
-        return $this->hasMany(TransactionMembership::class, 'membership_id', 'id');
+        return $this->hasMany(TransactionMembership::class, 'membership_id', 'id')->latest();
     }
 
     public function isUser(){

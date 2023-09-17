@@ -21,7 +21,7 @@
 
             @hasrole('ADMINISTRATOR')
                 <!-- Quick links  -->
-                <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown me-2 me-xl-0">
+                {{-- <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown me-2 me-xl-0">
                     <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                         <i class='ti ti-layout-grid-add ti-md'></i>
                     </a>
@@ -99,7 +99,7 @@
                             </div>
                         </div>
                     </div>
-                </li>
+                </li> --}}
                 <!-- Quick links -->
             @endhasrole
 
@@ -319,23 +319,20 @@
                     <li>
                         <div class="dropdown-divider"></div>
                     </li>
+                    @hasrole('MEMBERSHIP')
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('user.profile') }}">
                             <i class="ti ti-user-check me-2 ti-sm"></i>
                             <span class="align-middle">My Profile</span>
                         </a>
                     </li>
-                    @hasrole('MEMBERSHIP')
                     <li>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="{{ route('kunjungan.index') }}">
                             <i class="ti ti-settings me-2 ti-sm"></i>
                             <span class="align-middle">Checkin / Checkout</span>
                         </a>
                     </li>
                     @endhasrole
-                    <li>
-                        <div class="dropdown-divider"></div>
-                    </li>
                     <li>
                         <form action="{{ route('logout.member') }}" method="POST">
                             @csrf
