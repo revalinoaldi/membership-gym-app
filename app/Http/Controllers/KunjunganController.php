@@ -54,7 +54,7 @@ class KunjunganController extends Controller
                 return redirect()->back()->withErrors($valid->errors());
             }
 
-            if(Auth::user()->is_member->member->status = "NON ACTIVE" || (Carbon::now() > Carbon::parse(Auth::user()->is_member->member->expired_date))){
+            if(Auth::user()->is_member->member->status == "NON ACTIVE" || (Carbon::now()->startOfDay() > Carbon::parse(Auth::user()->is_member->member->expired_date)->startOfDay())){
                 throw new Exception("User is Not Active! You can't do it checkin gym");
             }
 
