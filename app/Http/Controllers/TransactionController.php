@@ -13,6 +13,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Midtrans\Snap;
 use Midtrans\Config;
@@ -23,80 +25,187 @@ use Midtrans\Transaction as TransactionMidtrans;
 class TransactionController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
+    * Display a listing of the resource.
+    */
     public function index()
     {
-        return view('templates.pages.transaksi.index');
+
+        try {
+            $transaksi = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->get(url('api/membership/transaction'))->throw()->json();
+
+            return view('templates.pages.transaksi.index',[
+                'transaksi' => $transaksi['data']['list'],
+                'member' => $transaksi['data']['totalMember'],
+                'invoice' => $transaksi['data']['totalTrans'],
+                'paid' => $transaksi['data']['totalPaid'],
+                'unpaid' => $transaksi['data']['totalUnPaid'],
+            ]);
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
     }
 
-        /**
-     * Show the form for creating a new resource.
-     */
+    /**
+    * Show the form for creating a new resource.
+    */
     public function create(Request $request)
     {
+        $paket = Http::withHeaders([
+            'Authorization' => 'Bearer '.Session::get('token'),
+            'Content-Type' => 'application/json'
+        ])->get(url('api/paket/list'))->throw()->json();
+
         return view('templates.pages.transaksi.form',[
-            'pakets' => Paket::get(),
-            'isExtends' => @$request->type == 'extends' ? 99 : 1
-        ]);
-    }
-
-        /**
-     * Display the specified resource.
-     */
-    // public function show(TransactionMembership $transaction)
-    public function show($transaction)
-    {
-        return view('templates.pages.transaksi.show',[
-            'transaksi' => $transaction
-        ]);
-    }
-
-    public function payment($transaction)
-    {
-        return view('templates.pages.transaksi.payment',[
-            'transaksi' => $transaction
+            'pakets' => $paket['data'],
+            'isExtends' => 99
         ]);
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
+    * Display the specified resource.
+    */
+    // public function show(TransactionMembership $transaction)
+    public function show($transaction)
+    {
+        try {
+            $transaksi = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->get(url('api/membership/checkout/'.$transaction))->throw()->json();
+
+            return view('templates.pages.transaksi.show',[
+                'transaksi' => $transaksi['data']
+            ]);
+
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function print($transaction)
+    {
+        try {
+            $transaksi = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->get(url('api/membership/checkout/'.$transaction))->throw()->json();
+
+            return view('templates.pages.transaksi.print',[
+                'transaksi' => $transaksi['data']
+            ]);
+
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function payment(TransactionMembership $transaction)
+    {
+        if($transaction->membership->kode_member != Auth::user()->is_member->member->kode_member){
+            return redirect()->back();
+        }
+        try {
+            return view('templates.pages.transaksi.payment',[
+                'transaksi' => $transaction
+            ]);
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function checkout(Request $request){
+        try {
+            $valid = Validator::make($request->all(), [
+                'paket_id' => 'required|exists:pakets,id',
+                'total_biaya' => 'required',
+                'type' => 'required'
+            ]);
+
+            if($valid->fails()){
+                return redirect()->back()->withErrors($valid->errors());
+            }
+
+            $paket = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->post(url('api/membership/checkout'), $request->all())->throw()->json();
+
+            if(!$paket['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            return redirect()->route('transaksi.payment.member', $paket['data']['kode_transaksi'])->with('success', 'Success Create Data');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
+    }
+
+    /**
+    * Show the form for editing the specified resource.
+    */
     public function edit(TransactionMembership $transaction)
     {
         //
     }
 
     public function list(Request $request){
-        $get = TransactionMembership::with(['paket', 'users', 'membership']);
+        $get = TransactionMembership::with(['paket', 'paket.activation', 'users', 'membership']);
 
-        // if(@$request->jenis_kelamin){
-        //     $get->where('jenis_kelamin', $request->jenis_kelamin);
-        // }
+        if(Auth::user()->roles->pluck('name')[0] == "MEMBERSHIP"){
+            $get->whereHas('membership', function($q){
+                $q->where('id', Auth::user()->is_member->member->id);
+            });
+            $totalMember = Membership::where('id', Auth::user()->is_member->member->id)->count();
+            $totalTrans = $get->count();
+            $totalPaid = TransactionMembership::where('paid_status', '1')
+                        ->whereHas('membership', function($q){
+                            $q->where('id', Auth::user()->is_member->member->id);
+                        })
+                        ->sum('total_biaya');
+            $totalUnPaid = TransactionMembership::where('paid_status', '0')
+                        ->whereHas('membership', function($q){
+                            $q->where('id', Auth::user()->is_member->member->id);
+                        })
+                        ->sum('total_biaya');
+        }else{
+            $totalMember = Membership::query()->count();
+            $totalTrans = $get->count();
+            $totalPaid = TransactionMembership::where('paid_status', '1')->sum('total_biaya');
+            $totalUnPaid = TransactionMembership::where('paid_status', '0')->sum('total_biaya');
+        }
 
-        // if(@$request->status){
-        //     $get->where('status', $request->status);
-        // }
+        $dataTrans = $get->latest()->get();
+        return response()->json([
+            'result' => true,
+            'message' => 'Success user Transaction on Membership',
+            'data' => [
+                'totalMember' => $totalMember,
+                'totalTrans' => $totalTrans,
+                'totalUnPaid' => $totalUnPaid,
+                'totalPaid' => $totalPaid,
+                'list' => $dataTrans
+            ]
+        ], 200);
+    }
 
-        // if(@$request->paket){
-        //     $paket = $request->paket;
-        //     $get->whereHas('paket', function($query) use($paket){
-        //         $query->where('slug', $paket);
-        //     });
-        // }
+    public function listOne($transaction){
+        $get = TransactionMembership::with(['paket', 'paket.activation', 'users', 'membership'])
+                ->where('kode_transaksi', $transaction)
+                ->orderBy('created_at', 'desc')->first();
 
         return response()->json([
             'result' => true,
             'message' => 'Success user Transaction on Membership',
-            'data' => $get->orderBy('created_at', 'desc')->get()
+            'data' => $get
         ], 200);
     }
 
-
-
     /**
-     * Store a newly created resource in storage.
-     */
+    * Store a newly created resource in storage.
+    */
     public function store(TransactionsRequest $request)
     {
         DB::beginTransaction();
@@ -320,8 +429,8 @@ class TransactionController extends Controller
             {
                 return response()->json([
 
-                        'code' => 200,
-                        'message' => 'Midtrans Payment Challenge'
+                    'code' => 200,
+                    'message' => 'Midtrans Payment Challenge'
 
                 ], 200);
             }
@@ -329,16 +438,16 @@ class TransactionController extends Controller
             {
                 return response()->json([
 
-                        'code' => 200,
-                        'message' => 'Midtrans Payment not Settlement'
+                    'code' => 200,
+                    'message' => 'Midtrans Payment not Settlement'
 
                 ], 200);
             }
 
             return response()->json([
 
-                    'code' => 200,
-                    'message' => 'Midtrans Notification Success'
+                'code' => 200,
+                'message' => 'Midtrans Notification Success'
 
             ], 200);
         }
@@ -347,16 +456,16 @@ class TransactionController extends Controller
 
 
     /**
-     * Update the specified resource in storage.
-     */
+    * Update the specified resource in storage.
+    */
     public function update(Request $request, TransactionMembership $transaction)
     {
         //
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
+    * Remove the specified resource from storage.
+    */
     public function destroy(TransactionMembership $transaction)
     {
         //

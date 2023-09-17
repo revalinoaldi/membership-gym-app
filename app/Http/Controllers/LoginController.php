@@ -113,7 +113,7 @@ class LoginController extends Controller
                 ], 500);
             }
 
-            User::create([
+            $userCreate = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
@@ -151,6 +151,8 @@ class LoginController extends Controller
                     'user_id' => $user->id,
                     'membership_id' => $member->id
                 ]);
+
+                $userCreate->assignRole('MEMBERSHIP');
 
                 $user['isMember'] = $member;
             }
@@ -191,10 +193,33 @@ class LoginController extends Controller
     {
         DB::beginTransaction();
         try {
+            $valid = [
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$request->email.",email"],
+            ];
+
+            if(@$request->password){
+                $valid['password'] = ['required', 'string', new Password];
+            }
+
+            if($request->isMember == 1){
+                $valid['jenis_kelamin'] = 'required';
+                $valid['alamat'] = 'required';
+                $valid['no_telp'] = 'required';
+            }
+
+            $validator = Validator::make($request->all(), $valid);
+            if($validator->fails()){
+                return response()->json([
+                    'message' => 'Failed! Something went wrong',
+                    'error' => $validator->errors(),
+                    'result' => false
+                ], 500);
+            }
+
             $data = [
                 'name' => $request->name,
                 'email' => $request->email,
-                'username' => $request->username
             ];
 
             if(@$request->password){

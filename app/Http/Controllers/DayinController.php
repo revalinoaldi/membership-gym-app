@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KunjunganDayin;
+use App\Models\KunjunganMember;
+use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DayinController extends Controller
 {
@@ -11,7 +17,11 @@ class DayinController extends Controller
      */
     public function index()
     {
+        $today = KunjunganDayin::where('datein', Carbon::now()->format('Y-m-d'));
         return view('templates.pages.dayin.index',[
+            'totalToday' => $today->first(),
+            'allTotal' => KunjunganMember::count(),
+            'dayins' => KunjunganDayin::orderBy('datein')->get()
         ]);
     }
 
@@ -32,7 +42,33 @@ class DayinController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $a = 0;
+            do {
+                if($a > 0){
+                    $tgl = Carbon::now()->addDays($a)->format('Y-m-d');
+                }else{
+                    $tgl = Carbon::now()->format('Y-m-d');
+                }
+                KunjunganDayin::where('datein', $tgl)->firstOr(function() use($tgl) {
+                    $dayin = KunjunganDayin::create([
+                        'kode_kunjungan' => mt_rand(100000,999999),
+                        'datein' => $tgl,
+                        'user_id' => Auth::user()->id
+                    ]);
+
+                    return $dayin;
+                });
+                $a++;
+            } while ($a < (@$request->bulk != 0 ? $request->bulk : 1));
+
+            DB::commit();
+            return redirect()->route('dayin.index')->with('success', 'Success added Date Kunjungan Day In');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
     }
 
     /**

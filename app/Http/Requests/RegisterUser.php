@@ -33,7 +33,7 @@ class RegisterUser extends FormRequest
             'password' => ['required', 'string', new Password]
         ];
 
-        if($this->isMember == 1){
+        if(@$this->isMember == 1){
             $valid['jenis_kelamin'] = 'required';
             $valid['alamat'] = 'required';
             $valid['no_telp'] = 'required';

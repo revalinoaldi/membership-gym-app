@@ -53,15 +53,99 @@ class PaketController extends Controller
      */
     public function edit(Paket $paket)
     {
-        //
+        try {
+            return view('templates.pages.paket.form',[
+                'paket' => $paket,
+                'aktivasi' => TypeActivation::get()
+            ]);
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    public function submitCreate(Request $request){
+        try {
+            $paket = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->post(url('api/membership/paket'), $request->all())->throw()->json();
+
+            if(!$paket['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            return redirect()->back()->with('success', 'Success Create Data');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
+    }
+
+    public function submitUpdate(Request $request, $paket){
+        try {
+            $paketUpdate = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->post(url("api/membership/paket/{$paket}/update"), $request->all())->throw()->json();
+
+            if(!$paketUpdate['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            return redirect()->route('paket.index')->with('success', 'Success Updated Data');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
+    }
+
+    public function submitDelete(Request $request, $paket){
+        try {
+            $paketUpdate = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->delete(url("api/membership/paket/{$paket}"), [])->throw()->json();
+
+            if(!$paketUpdate['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            return redirect()->route('paket.index')->with('success', 'Success Updated Data');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
+    }
+
+    public function submitRestore(Request $request, $paket){
+        try {
+            $paketUpdate = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->post(url("api/membership/paket/{$paket}/restore"), $request->all())->throw()->json();
+
+            if(!$paketUpdate['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            return redirect()->route('paket.index')->with('success', 'Success Restore Data');
+        } catch (Exception $error) {
+            return redirect()->back()->withErrors($error->getMessage());
+        }
     }
 
     /*************************************************
      *                  Return the API
      **************************************************/
 
+    public function listForMember(){
+        $get = Paket::with(['activation'])->orderBy('harga', 'asc')->orderBy('nama_paket', 'asc')->get();
+        return response()->json([
+            'result' => true,
+            'message' => 'Success paket membership',
+            'data' => $get
+        ], 200);
+    }
+
     public function list(){
-        $get = Paket::with(['activation'])->orderBy('nama_paket', 'asc')->get();
+        $get = Paket::withTrashed()->with(['activation'])->orderBy('harga', 'asc')->orderBy('nama_paket', 'asc')->get();
         return response()->json([
             'result' => true,
             'message' => 'Success paket membership',
@@ -156,6 +240,32 @@ class PaketController extends Controller
         DB::beginTransaction();
         try {
             $paket->delete();
+
+            DB::commit();
+            return response()->json([
+                'result' => true,
+                'message' => 'Success delete data paket membership',
+                'data' => []
+            ], 200);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 400);
+        }
+    }
+
+    public function restore(Request $request, $paket)
+    {
+        DB::beginTransaction();
+        try {
+            if (!$paket) {
+                throw new Exception("Validation Error");
+            }
+
+            Paket::withTrashed()->where('slug', $paket)->restore();
 
             DB::commit();
             return response()->json([

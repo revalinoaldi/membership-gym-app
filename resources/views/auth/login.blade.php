@@ -66,17 +66,20 @@
                         <h4 class="mb-1 pt-2">Welcome to NFC-APP! 👋</h4>
                         <p class="mb-4">Please sign-in to your account and start the Gym</p>
 
-                        @if (session('success'))
-                            <div class="alert alert-success alert-dismissible shadow" role="alert">
-                                {{ session('success') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        @if ($errors->any())
+                        <div class="mb-3">
+                            <div class="alert alert-danger alert-dismissible alert-solid alert-label-icon shadow fade show mb-xl-0" role="alert">
+                                <i class="ri-error-warning-line label-icon"></i><strong>{{ __('Whoops! Something went wrong.') }}</strong>
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                    <li> {{ $error }} </li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
-                        @elseif (session('error'))
-                            <div class="alert alert-danger alert-dismissible shadow" role="alert">
-                                {{ session('error') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
+                        </div>
                         @endif
+                        {{-- Error Start --}}
 
                         <form id="formAuthentication" class="mb-3" action="{{ route('login.member') }}" method="POST">
                             @csrf
@@ -109,9 +112,9 @@
                         <p class="text-center">
                             <span>New on our platform?</span>
                             <a href="{{ route('register') }}">
-                              <span>Create an account</span>
+                                <span>Create an account</span>
                             </a>
-                          </p>
+                        </p>
                     </div>
                 </div>
                 <!-- /Register -->
@@ -150,9 +153,9 @@
     <script>
         $(document).ready(() => {
             @php
-                if(@auth()->user()){
-                    echo "window.location.href='".url('/home')."'";
-                }
+            if(auth()->user()){
+                echo "window.location.href='".url('/home')."'";
+            }
             @endphp
         })
     </script>
