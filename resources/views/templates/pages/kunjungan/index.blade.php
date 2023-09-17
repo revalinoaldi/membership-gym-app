@@ -46,8 +46,15 @@
         <div class="card mb-4">
             <div class="card-widget-separator-wrapper">
                 <div class="card-header">
-                    <h5>Today Checkin</h5>
-                    @if (auth()->user()->is_member->member->status = "NON ACTIVE" || (\Carbon\Carbon::now() > \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)))
+                    <h5>Today Checkin
+                        {{-- {{(\Carbon\Carbon::now()->format('Y-m-d') < \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)->format('Y-m-d')) ? "Hello" : "World" }} --}}
+                        @php
+                            // $now = \Carbon\Carbon::now()->startOfDay();
+                            // $start = \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)->startOfDay();
+                            // echo $start->diffInDays()." - {$now} - {$start}";
+                        @endphp
+                    </h5>
+                    @if (auth()->user()->is_member->member->status == "NON ACTIVE" || (\Carbon\Carbon::now()->startOfDay() > \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)->startOfDay() ))
                         <div class="alert alert-danger alert-dismissible shadow" role="alert">
                             User is Not Active! You can't do it checkin gym!
                         </div>
