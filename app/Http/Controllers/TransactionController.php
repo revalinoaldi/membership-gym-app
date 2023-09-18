@@ -107,9 +107,18 @@ class TransactionController extends Controller
         if($transaction->membership->kode_member != Auth::user()->is_member->member->kode_member){
             return redirect()->back();
         }
+
+        // dd($transaction->toArray());
+
+        // $statusTransaction = Http::withHeaders([
+        //     'Authorization' => 'Bearer '.Session::get('token'),
+        //     'Content-Type' => 'application/json'
+        // ])->get(url('api/membership/transaction/status?kode_trans='.$transaction->kode_transaksi))->throw()->json();
+
         try {
             return view('templates.pages.transaksi.payment',[
-                'transaksi' => $transaction
+                'transaksi' => $transaction,
+                // 'status' => $statusTransaction['data']
             ]);
         } catch (Exception $e) {
             dd($e->getMessage());
@@ -140,6 +149,112 @@ class TransactionController extends Controller
             return redirect()->route('transaksi.payment.member', $paket['data']['kode_transaksi'])->with('success', 'Success Create Data');
         } catch (Exception $error) {
             return redirect()->back()->withErrors($error->getMessage());
+        }
+    }
+
+    public function setCallback(Request $request){
+        // dd($request);
+        try {
+            $statusTransaction = Http::withHeaders([
+                'Authorization' => 'Bearer '.Session::get('token'),
+                'Content-Type' => 'application/json'
+            ])->get(url('api/membership/transaction/status?kode_trans='.$request->order_id))->throw()->json();
+
+            if(!$statusTransaction['result']){
+                throw new Exception("Something when wrong, please try again.");
+            }
+
+            if($statusTransaction['data']['transaction_status'] == 'settlement' || $statusTransaction['data']['transaction_status'] == 'capture'){
+                $this->_setCallback($statusTransaction['transaction']);
+
+                return redirect()->route('user.profile')->with('success', 'Success paid member');
+            }else{
+                throw new Exception("Transaction is not Settlement.");
+            }
+        } catch (Exception $error) {
+            return redirect()->route('user.profile')->withErrors($error->getMessage());
+        }
+    }
+
+    private function _setCallback($notification){
+        $status = $notification['transaction_status'];
+        $type = $notification['payment_type'];
+        $fraud = $notification['fraud_status'];
+        $order_id = $notification['order_id'];
+
+        // Cari transaksi berdasarkan ID
+        $transaction = TransactionMembership::where('kode_transaksi', $order_id)->firstOrFail();
+        $membership = Membership::where('id', $transaction->membership_id)->firstOrFail();
+
+        $callback = [
+            'trans_callback' => json_encode($notification)
+        ];
+        // Handle notification status midtrans
+        if ($status == 'capture') {
+            if ($type == 'credit_card'){
+                if($fraud == 'challenge'){
+                    $callback['status'] = 'PENDING';
+                }
+                else {
+                    $callback['status'] = 'SUCCESS';
+                    $transaction->paid_status = '1';
+                }
+            }
+        }
+        else if ($status == 'settlement'){
+            $callback['status'] = 'SUCCESS';
+            $transaction->paid_status = '1';
+            $membership->paket_id = $transaction->paket_id;
+            $membership->status = 'ACTIVE';
+            $membership->expired_date = Carbon::now()->add($transaction->paket->masa_aktif, $transaction->paket->activation->type)->format('Y-m-d H:i:s');
+        }
+        else if($status == 'pending'){
+            $callback['status'] = 'PENDING';
+        }
+        else if ($status == 'deny') {
+            $callback['status'] = 'CANCELLED';
+        }
+        else if ($status == 'expire') {
+            $callback['status'] = 'CANCELLED';
+        }
+        else if ($status == 'cancel') {
+            $callback['status'] = 'CANCELLED';
+        }
+
+        $transaction->remark = $notification;
+        // Simpan transaksi
+        $transaction->save();
+        $membership->save();
+
+        return ['transaction' => $transaction, 'membership' => $membership];
+    }
+
+    public function checkStatus(Request $request){
+        try {
+            $trans = TransactionMembership::where('kode_transaksi', $request->kode_trans)->firstOrFail();
+
+            // Set konfigurasi midtrans
+            Config::$serverKey = config('services.midtrans.serverKey');
+            Config::$isProduction = config('services.midtrans.isProduction');
+            Config::$isSanitized = config('services.midtrans.isSanitized');
+            Config::$is3ds = config('services.midtrans.is3ds');
+
+            $status = TransactionMidtrans::status($trans->kode_transaksi);
+
+            return response()->json([
+                'result' => true,
+                'message' => "Success get transaction status",
+                'data' => [
+                    'transaction_status' => $status->transaction_status,
+                    'transaction_id' => $status->transaction_id
+                ],
+                'transaction' => $status
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'result' => false,
+                'message' => $e->getMessage()
+            ], 400);
         }
     }
 
@@ -202,6 +317,10 @@ class TransactionController extends Controller
             'data' => $get
         ], 200);
     }
+
+    // ===============================================
+    //                  NEXT ON API
+    // ===============================================
 
     /**
     * Store a newly created resource in storage.
@@ -292,10 +411,10 @@ class TransactionController extends Controller
             return $paymentUrl;
         }
         catch (Exception $e) {
-            return [
-                'result' => true,
+            return json_encode([
+                'result' => false,
                 'message' => $e->getMessage()
-            ];
+            ]);
         }
     }
 

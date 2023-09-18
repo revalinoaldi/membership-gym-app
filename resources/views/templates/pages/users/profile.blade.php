@@ -107,17 +107,17 @@
                             <span class="badge bg-label-primary">{{ $member->paket->nama_paket }}</span>
                             <div class="d-flex justify-content-center">
                                 <sup class="h6 pricing-currency mt-3 mb-0 me-1 text-primary fw-normal">Rp</sup>
-                                <h1 class="mb-0 text-primary">{{ $member->paket->harga }}</h1>
-                                <sub class="h6 pricing-duration mt-auto mb-2 text-muted fw-normal">/month</sub>
+                                <h1 class="mb-0 text-primary">{{ number_format($member->paket->harga, 0, ',', '.') }}</h1>
+                                <sub class="h6 pricing-duration mt-auto mb-2 text-muted fw-normal"></sub>
                             </div>
                         </div>
                         <ul class="ps-3 g-2 my-3">
                             <li class="mb-2">{{ $member->paket->deskripsi }}</li>
                             <li class="mb-2">{{ \Carbon\Carbon::parse($member->expired_date)->format('d M Y H:i:s') }}</li>
-                            <li>{!! (\Carbon\Carbon::now() > \Carbon\Carbon::parse($item['expired_date'])) ? 'Expired' : \Carbon\Carbon::parse($item['expired_date'])->diffForHumans() !!}</li>
+                            <li>{!! (\Carbon\Carbon::now() > \Carbon\Carbon::parse($member->expired_date)) ? 'Expired' : \Carbon\Carbon::parse($member->expired_date)->diffForHumans() !!}</li>
                         </ul>
                         <div class="d-grid w-100 mt-4">
-                            <a href="{{ route('transaksi.create')."?type=extends" }}" class="btn btn-primary">Upgrade Plan</a>
+                            <a href="{{ route('transaksi.create')."?type=extends" }}" onclick="return confirm(`are you sure to changes plan? \nYou can delete this paket member active`)" class="btn btn-primary">Upgrade Plan</a>
                         </div>
                     </div>
                 </div>

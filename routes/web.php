@@ -52,6 +52,7 @@ Route::middleware([
     Route::get('transaksi/print/{transaction}', [TransactionController::class, 'print'])->name('transaksi.invoice.print');
     Route::get('transaksi/payment/{transaction}', [TransactionController::class, 'payment'])->name('transaksi.payment.member');
     Route::post('transaksi/checkout', [TransactionController::class, 'checkout'])->name('transaksi.payment.checkout');
+    Route::get('transaksi-success', [TransactionController::class, 'setCallback'])->name('transaksi.payment.setcallback');
 
     Route::resource('dayin', DayinController::class);
 
