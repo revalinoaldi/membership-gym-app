@@ -123,10 +123,22 @@
                             <span class="me-2">Proceed with Payment</span>
                             <i class="ti ti-arrow-right scaleX-n1-rtl"></i>
                         </a> --}}
-                        <button type="button" class="btn btn-success" id="btn-pay">
+                        {{-- @if ($status['transaction_status'] == 'pending')
+                            <a href="javascript:void(0);" class="btn btn-secondary" >
+                                <span class="me-2">Waiting Payment still Pending</span>
+                                <i class="ti ti-circle-x scaleX-n1-rtl"></i>
+                            </a> --}}
+                        {{-- @if (in_array($status['transaction_status'], ['expire', 'cancel', 'deny']))
+                            <a href="javascript:void(0);" class="btn btn-danger" >
+                                <span class="me-2">Can't Process Payment</span>
+                                <i class="ti ti-circle-x scaleX-n1-rtl"></i>
+                            </a>
+                        @else
+                        @endif --}}
+                        <a href="javascript:void(0);" class="btn btn-success" id="btn-pay">
                             <span class="me-2">Proceed with Payment</span>
                             <i class="ti ti-arrow-right scaleX-n1-rtl"></i>
-                        </button>
+                        </a>
                     </div>
 
                     <p class="mt-4 pt-2">By continuing, you accept to our Terms of Services and Privacy Policy. Please note that payments are non-refundable.</p>
@@ -134,11 +146,35 @@
             </div>
         </div>
     </div>
-    {{-- <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key=""></script> --}}
-    @push('midtrans')
-        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
-    @endpush
 
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    <script>
+        const btnPay = document.querySelector('#btn-pay')
+        btnPay && btnPay.addEventListener('click', function(){
+            let token = `{!! $transaksi->payment_url !!}`;
+            let _token = $('meta[name="csrf-token"]').attr("content");
+            let trans_code = `{{ $transaksi->kode_transaksi }}`
+            snap.pay(token, {
+                onSuccess: function(result){
+                    let orderID = result.order_id;
+                    window.location.href = `{{ route('transaksi.payment.setcallback') }}?order_id=${orderID}`
+                },
+                onPending: function(result){
+                    alert('Payment On Pending')
+                    window.location.reload();
+                    /* You may add your own js here, this is just example */
+                    // window.location.href = window.location.href+"&check=true"
+                },
+                // Optional
+                onError: function(result){
+                    alert('Failed! Something when wrong, try again!')
+                    window.location.reload();
+                    /* You may add your own js here, this is just example */
+                    // window.location.href = window.location.href+"&check=true"
+                }
+            });
+        })
+    </script>
     @push('scripts')
 
     <!-- Vendors JS -->

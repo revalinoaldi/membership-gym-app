@@ -48,6 +48,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('membership/transaction', [TransactionController::class, 'list']);
     Route::get('membership/checkout/{transaction}', [TransactionController::class, 'listOne']);
     Route::post('membership/checkout', [TransactionController::class, 'store']);
+    Route::post('membership/transaction/callback', [TransactionController::class, 'callback']);
+    Route::get('membership/transaction/status', [TransactionController::class, 'checkStatus']);
 
     Route::post('membership/checkout/{transaction}/cancel', [TransactionController::class, 'cancleTransaction']);
 

@@ -25,6 +25,27 @@ class DayinController extends Controller
         ]);
     }
 
+    public function show(KunjunganDayin $dayin){
+
+        $kunjungan = KunjunganMember::with(['kunjungan', 'membership'])->whereHas('kunjungan', function($q) use($dayin){
+            $q->where('kode_kunjungan', $dayin->kode_kunjungan);
+        })->get();
+        // dd($kunjungan->toArray());
+        return view('templates.pages.dayin.listall', [
+            'dayin' => $dayin,
+            'checklist' => $kunjungan
+        ]);
+    }
+
+    public function all(Request $request){
+
+        $kunjungan = KunjunganMember::with(['kunjungan' => function($q){ $q->orderBy('datein', 'desc'); }, 'membership'])->get();
+        // dd($kunjungan->toArray());
+        return view('templates.pages.dayin.listall', [
+            'checklist' => $kunjungan
+        ]);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -74,10 +95,10 @@ class DayinController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+    // public function show(string $id)
+    // {
+    //     //
+    // }
 
     /**
      * Show the form for editing the specified resource.

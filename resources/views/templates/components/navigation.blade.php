@@ -73,17 +73,17 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{ route('member.index') }}" class="menu-link">
                         <div data-i18n="Report Semua Member">Report Semua Member</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{ route('dayin.index') }}" class="menu-link">
                         <div data-i18n="Report Daily Checkin">Report Daily Checkin</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="#" class="menu-link">
+                    <a href="{{ route('transaksi.index') }}" class="menu-link">
                         <div data-i18n="Report Transaksi">Report Transaksi</div>
                     </a>
                 </li>

@@ -19,7 +19,7 @@
 
     <div class="row">
         <h4 class="py-3 mb-4">
-            <span class="text-muted fw-light">Memberships /</span> Day In Gym
+            <span class="text-muted fw-light">Memberships /</span> Kunjungan
         </h4>
         <!-- DataTable with Buttons -->
         @if (session('success'))
@@ -42,82 +42,38 @@
             </div>
         </div>
         @endif
-        <div class="card mb-4">
-            <div class="card-widget-separator-wrapper">
-                <div class="card-body card-widget-separator">
-                    <div class="row gy-4 gy-sm-1">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="d-flex justify-content-between align-items-start card-widget-1 border-end pb-3 pb-sm-0">
-                                <div>
-                                    <h3 class="mb-1">{{ @$allTotal ? $allTotal : 0 }}</h3>
-                                    <p class="mb-0">Total Report Checkin Dayin</p>
-                                </div>
-                                <span class="avatar me-sm-4">
-                                    <span class="avatar-initial bg-label-primary rounded"><i class="ti ti-user ti-md"></i></span>
-                                </span>
-                            </div>
-                            <hr class="d-none d-sm-block d-lg-none me-4">
-                        </div>
 
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="d-flex justify-content-between align-items-start border-end pb-3 pb-sm-0 card-widget-3">
-                                <div>
-                                    <h3 class="mb-1">{{ @$totalToday->kunjungan ? $totalToday->kunjungan->count() : 0 }}</h3>
-                                    <p class="mb-0">Total Member Checkin Today</p>
-                                </div>
-                                <span class="avatar me-sm-4">
-                                    <span class="avatar-initial bg-label-success rounded"><i class="ti ti-checks ti-md"></i></span>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-6">
-                            <div class="d-flex justify-content-between align-items-start card-widget-2 pb-3 pb-sm-0">
-                                <div>
-                                    <h3 class="mb-1">{{ @$totalToday->kode_kunjungan ? $totalToday->kode_kunjungan : '-' }}</h3>
-                                    <p class="mb-0">Kode Checkin Today</p>
-                                </div>
-                                <span class="avatar me-lg-4">
-                                    <span class="avatar-initial bg-label-info rounded"><i class="ti ti-lock ti-md"></i></span>
-                                </span>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="card">
             <div class="card-datatable table-responsive pt-0">
                 <table class="datatables-basic table">
                     <thead>
                         <tr>
-                            <th>Kode Day In</th>
-                            <th>Tanggal Dayin</th>
-                            <th>Total Member Checkin</th>
-                            {{-- <th>Action</th> --}}
+                            <th>#</th>
+                            <th>Member</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Tgl Kunjungan</th>
+                            <th>Waktu Checkin</th>
+                            <th>Waktu Checkout</th>
+                            <th>Status</th>
+                            <th>Penjaga</th>
+                            {{-- <th class="cell-fit">Actions</th> --}}
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($dayins as $item)
+                        @foreach ($checklist as $check)
                             <tr>
-                                <td><a href="{{ route('dayin.show', $item->kode_kunjungan) }}">{{ $item->kode_kunjungan }}</a></td>
-                                <th>{{ \Carbon\Carbon::parse($item->datein)->format('d M Y') }}</th>
-                                <td>{{ $item->kunjungan->count() }} Member</td>
-                                {{-- <td>#</td> --}}
+                                <td>#{{ $loop->iteration }}</td>
+                                <td>{{ "[{$check->membership->kode_member}]".$check->membership->nama_lengkap }}</td>
+                                <td>{{ $check->membership->jenis_kelamin }}</td>
+                                <td>{{ \Carbon\Carbon::parse($check->kunjungan->datein)->format('d M Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($check->checkin_time)->format('H:i:s') }}</td>
+                                <td>{{ isset($check->checkout_time) ? \Carbon\Carbon::parse($check->checkout_time)->format('H:i:s') : '' }}</td>
+                                <td>{{ $check->status }}</td>
+                                <td>{{ $check->users->name }}</td>
                             </tr>
                         @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2">Check All Member Checkin</td>
-                            <td class="text-end">
-                                <a href="{{ route('dayin.list.all') }}" class="btn btn-primary">
-                                    All Member Checkin/Checkout
-                                </a>
-                            </td>
-                        </tr>
-                    </tfoot>
+                     </tbody>
                 </table>
             </div>
         </div>
@@ -197,13 +153,6 @@
                     text: '<i class="ti ti-copy me-1" ></i>Copy',
                     className: "dropdown-item",
                 }]
-            }, {
-                text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                className: "btn btn-primary add-new",
-                attr: {
-                    "data-bs-toggle":"modal",
-                    "data-bs-target":"#modalCenter"
-                }
             }],
             responsive: {
                 details: {

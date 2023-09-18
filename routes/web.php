@@ -52,8 +52,10 @@ Route::middleware([
     Route::get('transaksi/print/{transaction}', [TransactionController::class, 'print'])->name('transaksi.invoice.print');
     Route::get('transaksi/payment/{transaction}', [TransactionController::class, 'payment'])->name('transaksi.payment.member');
     Route::post('transaksi/checkout', [TransactionController::class, 'checkout'])->name('transaksi.payment.checkout');
+    Route::get('transaksi-success', [TransactionController::class, 'setCallback'])->name('transaksi.payment.setcallback');
 
     Route::resource('dayin', DayinController::class);
+    Route::get('dayin-all', [DayinController::class, 'all'])->name('dayin.list.all');
 
     Route::resource('user/list', UsersController::class);
     Route::resource('user/member', MemberController::class);
@@ -63,6 +65,7 @@ Route::middleware([
 
 
     Route::resource('kunjungan', KunjunganController::class);
+
 });
 
 Route::get('test-url',function(){
