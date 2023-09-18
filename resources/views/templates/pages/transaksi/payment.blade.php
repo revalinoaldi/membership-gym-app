@@ -119,10 +119,14 @@
                         <h6 class="mb-0">Rp{{ number_format($transaksi->paket->harga, 0, ',', '.') }}</h6>
                     </div>
                     <div class="d-grid mt-3">
-                        <a href="{{ $transaksi->payment_url }}" class="btn btn-success" target="_blank" rel="noopener noreferrer">
+                        {{-- <a href="{{ $transaksi->payment_url }}" class="btn btn-success" target="_blank" rel="noopener noreferrer">
                             <span class="me-2">Proceed with Payment</span>
                             <i class="ti ti-arrow-right scaleX-n1-rtl"></i>
-                        </a>
+                        </a> --}}
+                        <button type="button" class="btn btn-success" id="btn-pay">
+                            <span class="me-2">Proceed with Payment</span>
+                            <i class="ti ti-arrow-right scaleX-n1-rtl"></i>
+                        </button>
                     </div>
 
                     <p class="mt-4 pt-2">By continuing, you accept to our Terms of Services and Privacy Policy. Please note that payments are non-refundable.</p>
@@ -130,6 +134,10 @@
             </div>
         </div>
     </div>
+    {{-- <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key=""></script> --}}
+    @push('midtrans')
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ env('MIDTRANS_CLIENT_KEY') }}"></script>
+    @endpush
 
     @push('scripts')
 
@@ -142,5 +150,6 @@
 
     <!-- Page JS -->
     <script src="/assets/js/front-page-payment.js"></script>
+
     @endpush
 </x-display-layout>

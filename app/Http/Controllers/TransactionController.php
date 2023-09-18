@@ -278,14 +278,15 @@ class TransactionController extends Controller
             'item_details' => [$itemDetail],
             'enabled_payments' => array('gopay','bank_transfer', 'shopeepay'),
             'custom_expiry' => $expiredTime,
-            'vtweb' => array()
         );
 
         // return $midtrans;
 
         try {
             // Ambil halaman payment midtrans
-            $paymentUrl = Snap::createTransaction($midtrans)->redirect_url;
+            // $paymentUrl = Snap::createTransaction($midtrans)->redirect_url;
+            $paymentUrl = Snap::getSnapToken($midtrans);
+
 
             // Redirect ke halaman midtrans
             return $paymentUrl;
