@@ -332,6 +332,12 @@
                             <span class="align-middle">Checkin / Checkout</span>
                         </a>
                     </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('transaksi.create') }}">
+                            <i class="ti ti-wallet me-2 ti-sm"></i>
+                            <span class="align-middle">Upgrade Plan</span>
+                        </a>
+                    </li>
                     @endhasrole
                     <li>
                         <form action="{{ route('logout.member') }}" method="POST">

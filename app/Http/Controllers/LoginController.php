@@ -171,7 +171,7 @@ class LoginController extends Controller
         } catch (Exception $error) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Authentication Failed! Something went wrong',
+                'message' => $error->getMessage(),
                 'error' => $error->getMessage(),
                 'result' => false
             ], 500);
