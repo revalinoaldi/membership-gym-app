@@ -58,7 +58,9 @@ class KunjunganController extends Controller
                 throw new Exception("User is Not Active! You can't do it checkin gym");
             }
 
-            $dayin = KunjunganDayin::where('kode_kunjungan', $request->kode_dayin)->firstOrFail();
+            $dayin = KunjunganDayin::where('kode_kunjungan', $request->kode_dayin)->whereHas('kunjungan', function($q){
+                $q->where('datein', Carbon::now()->format('Y-m-d'));
+            })->firstOrFail();
             // dd($dayin->user_id);
 
             $now = $now = Carbon::now()->format('H:i:s');
