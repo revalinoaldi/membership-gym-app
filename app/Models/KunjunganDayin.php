@@ -21,4 +21,9 @@ class KunjunganDayin extends Model
     {
         return $this->hasMany(KunjunganMember::class, 'kunjungan_id', 'id');
     }
+
+    public function getRouteKeyName()
+    {
+        return 'kode_kunjungan';
+    }
 }

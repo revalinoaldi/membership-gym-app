@@ -55,6 +55,7 @@ Route::middleware([
     Route::get('transaksi-success', [TransactionController::class, 'setCallback'])->name('transaksi.payment.setcallback');
 
     Route::resource('dayin', DayinController::class);
+    Route::get('dayin-all', [DayinController::class, 'all'])->name('dayin.list.all');
 
     Route::resource('user/list', UsersController::class);
     Route::resource('user/member', MemberController::class);
@@ -64,6 +65,7 @@ Route::middleware([
 
 
     Route::resource('kunjungan', KunjunganController::class);
+
 });
 
 Route::get('test-url',function(){
