@@ -70,7 +70,12 @@
                             </li>
                             <li class="mb-2 pt-1">
                                 <span class="fw-medium me-1">Status:</span>
-                                <span class="badge bg-{{ auth()->user()->is_member->member->status == "ACTIVE" ? "label-success" : "label-danger" }}">{{ auth()->user()->is_member->member->status }}</span>
+                                @if (auth()->user()->is_member->member->status == "NON ACTIVE" || (\Carbon\Carbon::now()->startOfDay() > \Carbon\Carbon::parse(auth()->user()->is_member->member->expired_date)->startOfDay() ))
+                                    <span class="badge bg-label-secondary" text-capitalized> NON ACTIVE</span>
+                                @else
+                                    <span class="badge bg-label-success" text-capitalized> {{ auth()->user()->is_member->member->status }}</span>
+                                @endif
+                                {{-- <span class="badge bg-{{ auth()->user()->is_member->member->status == "ACTIVE" ? "label-success" : "label-danger" }}">{{ auth()->user()->is_member->member->status }}</span> --}}
                             </li>
                             <li class="mb-2 pt-1">
                                 <span class="fw-medium me-1">Role:</span>

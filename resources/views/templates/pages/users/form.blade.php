@@ -76,7 +76,7 @@
 
                     <div class="col-sm-12 text-end mt-3">
                         <button type="submit" name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1">Submit</button>
-                        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+                        <button type="reset" class="btn btn-outline-secondary" onclick="history.back()" data-bs-dismiss="offcanvas">Cancel</button>
                     </div>
                 </form>
             </div>
