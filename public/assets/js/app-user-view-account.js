@@ -224,7 +224,7 @@ $(function() {
         ],
         buttons: [{
             extend: "collection",
-            className: "btn btn-label-secondary dropdown-toggle float-sm-end mb-3 mb-sm-0",
+            className: "btn btn-label-primary dropdown-toggle float-sm-end mb-3 mb-sm-0",
             text: '<i class="ti ti-screen-share ti-xs me-2"></i>Export',
             buttons: [{
                 extend: "print",

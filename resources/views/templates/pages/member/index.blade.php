@@ -46,10 +46,14 @@
                                 <td>{{ $item->name }}</td>
                                 <th>{{ $item->email }}</th>
                                 <td>{{ $item->is_member->member->jenis_kelamin }}</td>
-                                <td>{{ $item->is_member->member->no_telp }}</td>
+                                <td>0{{ preg_replace('~^[0\D]++|\D++~', '', $item->is_member->member->no_telp); }}</td>
                                 <td>{{ $item->is_member->member->alamat }}</td>
                                 <td>
-                                    <span class="badge bg-{{ $item->is_member->member->status == "ACTIVE" ? "label-success" : "label-secondary" }}" text-capitalized> {{ $item->is_member->member->status }}</span>
+                                    @if ($item->is_member->member->status == "NON ACTIVE" || (\Carbon\Carbon::now()->startOfDay() > \Carbon\Carbon::parse($item->is_member->member->expired_date)->startOfDay() ))
+                                        <span class="badge bg-label-secondary" text-capitalized> NON ACTIVE</span>
+                                    @else
+                                        <span class="badge bg-label-success" text-capitalized> {{ $item->is_member->member->status }}</span>
+                                    @endif
                                 </td>
                                 <td>
                                     {{ \Carbon\Carbon::parse($item->is_member->member->tgl_daftar)->format('d M Y') }}

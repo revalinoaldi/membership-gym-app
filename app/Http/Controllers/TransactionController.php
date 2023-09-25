@@ -108,20 +108,17 @@ class TransactionController extends Controller
             return redirect()->back();
         }
 
-        // dd($transaction->toArray());
-
-        // $statusTransaction = Http::withHeaders([
-        //     'Authorization' => 'Bearer '.Session::get('token'),
-        //     'Content-Type' => 'application/json'
-        // ])->get(url('api/membership/transaction/status?kode_trans='.$transaction->kode_transaksi))->throw()->json();
-
         try {
+            if ($transaction->paid_status == 1) {
+                throw new Exception("Transaksi sudah berhasil di bayarkan");
+            }
+
             return view('templates.pages.transaksi.payment',[
                 'transaksi' => $transaction,
                 // 'status' => $statusTransaction['data']
             ]);
         } catch (Exception $e) {
-            dd($e->getMessage());
+            return redirect()->route('user.profile')->withErrors($e->getMessage());
         }
     }
 

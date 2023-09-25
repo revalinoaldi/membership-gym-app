@@ -132,9 +132,21 @@
                     </button>
 
                     @hasrole('MEMBERSHIP')
-                        <button class="btn btn-primary d-grid w-100 mb-2" data-bs-toggle="offcanvas" data-bs-target="#sendInvoiceOffcanvas">
-                            <a href="{{ route('transaksi.payment.member', $transaksi['kode_transaksi']) }}" target="_blank" rel="noopener noreferrer" class="d-flex align-items-center justify-content-center text-nowrap text-white"><i class="ti ti-wallet ti-xs me-2"></i>Payment</a>
-                        </button>
+                        @if ($transaksi['paid_status'] == 0)
+                            @if (\Carbon\Carbon::now() > \Carbon\Carbon::parse($transaksi['expired_date']))
+                                <button class="btn btn-danger d-grid w-100 mb-2" data-bs-toggle="offcanvas" data-bs-target="#sendInvoiceOffcanvas">
+                                    <span><i class="fa fa-x"></i> Expired</span>
+                                </button>
+                            @else
+                                <button class="btn btn-primary d-grid w-100 mb-2" data-bs-toggle="offcanvas" data-bs-target="#sendInvoiceOffcanvas">
+                                    <a href="{{ route('transaksi.payment.member', $transaksi['kode_transaksi']) }}" target="_blank" rel="noopener noreferrer" class="d-flex align-items-center justify-content-center text-nowrap text-white"><i class="ti ti-wallet ti-xs me-2"></i>Payment</a>
+                                </button>
+                            @endif
+                        @else
+                            <button class="btn btn-success d-grid w-100 mb-2" data-bs-toggle="offcanvas" data-bs-target="#sendInvoiceOffcanvas">
+                                <span><i class="fa fa-check"></i> Success Paid</span>
+                            </button>
+                        @endif
                     @endhasrole
                 </div>
             </div>
