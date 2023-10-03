@@ -220,7 +220,7 @@ $(function() {
         scrollX: true,
         dom: '<"row mx-4"<"col-sm-6 col-12 d-flex align-items-center justify-content-center justify-content-sm-start mb-3 mb-md-0"l><"col-sm-6 col-12 d-flex align-items-center justify-content-center justify-content-sm-end"B>>t<"row mx-4"<"col-md-12 col-lg-6 text-center text-lg-start pb-md-2 pb-lg-0"i><"col-md-12 col-lg-6 d-flex justify-content-center justify-content-lg-end"p>>',
         order: [
-            [1, "desc"]
+            [1, "asc"]
         ],
         buttons: [{
             extend: "collection",

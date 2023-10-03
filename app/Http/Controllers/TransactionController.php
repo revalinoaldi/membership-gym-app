@@ -8,6 +8,9 @@ use App\Models\Membership;
 use App\Models\Paket;
 use App\Models\TransactionMembership;
 use App\Models\TypeActivation;
+use App\Models\User;
+use App\Notifications\InvoiceNotification;
+use App\Notifications\SuccessPaymentNotification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -20,6 +23,7 @@ use Midtrans\Snap;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Midtrans\Transaction as TransactionMidtrans;
+use Illuminate\Support\Facades\Notification as NotificationLaravel;
 
 
 class TransactionController extends Controller
@@ -143,6 +147,10 @@ class TransactionController extends Controller
                 throw new Exception("Something when wrong, please try again.");
             }
 
+            $user = Auth::user();
+            $transaksi = TransactionMembership::where('kode_transaksi', $paket['data']['kode_transaksi'])->first();
+            NotificationLaravel::send($user, new InvoiceNotification($transaksi));
+
             return redirect()->route('transaksi.payment.member', $paket['data']['kode_transaksi'])->with('success', 'Success Create Data');
         } catch (Exception $error) {
             return redirect()->back()->withErrors($error->getMessage());
@@ -162,7 +170,10 @@ class TransactionController extends Controller
             }
 
             if($statusTransaction['data']['transaction_status'] == 'settlement' || $statusTransaction['data']['transaction_status'] == 'capture'){
-                $this->_setCallback($statusTransaction['transaction']);
+                $callback = $this->_setCallback($statusTransaction['transaction']);
+
+                $user = Auth::user();
+                NotificationLaravel::send($user, new SuccessPaymentNotification($callback['transaction']));
 
                 return redirect()->route('user.profile')->with('success', 'Success paid member');
             }else{
@@ -195,12 +206,14 @@ class TransactionController extends Controller
                 else {
                     $callback['status'] = 'SUCCESS';
                     $transaction->paid_status = '1';
+                    $transaction->paid_date = Carbon::now()->format('Y-m-d H:i:s');
                 }
             }
         }
         else if ($status == 'settlement'){
             $callback['status'] = 'SUCCESS';
             $transaction->paid_status = '1';
+            $transaction->paid_date = Carbon::now()->format('Y-m-d H:i:s');
             $membership->paket_id = $transaction->paket_id;
             $membership->status = 'ACTIVE';
             $membership->expired_date = Carbon::now()->add($transaction->paket->masa_aktif, $transaction->paket->activation->type)->format('Y-m-d H:i:s');

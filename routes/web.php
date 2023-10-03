@@ -6,7 +6,10 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\PaketController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UsersController;
+use App\Models\TransactionMembership;
+use App\Notifications\SuccessPaymentNotification;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -62,7 +65,17 @@ Route::middleware([
     Route::get('profile', [UsersController::class, 'profile'])->name('user.profile');
     Route::post('profile/update', [UsersController::class, 'profileUpdate'])->name('user.profile.update');
 
-
+    Route::get('/test-email', function(){
+        $user = Auth::user();
+        $transaction = TransactionMembership::where('kode_transaksi', '0310-2023-225420-248-278-99')->first();
+        // dd($user->toArray());
+        try {
+            Notification::send($user, new SuccessPaymentNotification($transaction));
+            var_dump('success');
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+        }
+    });
 
     Route::resource('kunjungan', KunjunganController::class);
 
