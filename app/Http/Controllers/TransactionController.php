@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TransactionsRequest;
+use App\Mail\SuccessPayment;
 use App\Models\IsMembership;
 use App\Models\Membership;
 use App\Models\Paket;
@@ -17,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Midtrans\Snap;
@@ -174,6 +176,11 @@ class TransactionController extends Controller
 
                 $user = Auth::user();
                 NotificationLaravel::send($user, new SuccessPaymentNotification($callback['transaction']));
+
+                $admin = User::whereHas('roles', function($q){
+                    $q->where('name','ADMINISTRATOR');
+                })->first();
+                Mail::to($admin->email)->send(new SuccessPayment($callback['transaction']));
 
                 return redirect()->route('user.profile')->with('success', 'Success paid member');
             }else{

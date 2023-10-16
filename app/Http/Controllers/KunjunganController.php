@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CheckIn;
 use App\Models\KunjunganDayin;
 use App\Models\KunjunganMember;
+use App\Notifications\CheckInNotification;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class KunjunganController extends Controller
 {
@@ -46,6 +51,7 @@ class KunjunganController extends Controller
      */
     public function store(Request $request)
     {
+
         DB::beginTransaction();
         try {
             $valid = Validator::make($request->all(), [
@@ -59,21 +65,23 @@ class KunjunganController extends Controller
             if(Auth::user()->is_member->member->status == "NON ACTIVE" || (Carbon::now()->startOfDay() > Carbon::parse(Auth::user()->is_member->member->expired_date)->startOfDay())){
                 throw new Exception("User is Not Active! You can't do it checkin gym");
             }
+            $dayin = KunjunganDayin::where('kode_kunjungan', $request->kode_dayin)
+                    ->where('datein', Carbon::now()->format('Y-m-d'))->firstOrFail();
 
-            $dayin = KunjunganDayin::where('kode_kunjungan', $request->kode_dayin)->whereHas('kunjungan', function($q){
-                $q->where('datein', Carbon::now()->format('Y-m-d'));
-            })->firstOrFail();
-            // dd($dayin->user_id);
+            $now = Carbon::now()->format('H:i:s');
 
-            $now = $now = Carbon::now()->format('H:i:s');
-
-            KunjunganMember::create([
+            $kunjungan = KunjunganMember::create([
                 'kunjungan_id' => $dayin->id,
                 'transaction_code' => mt_rand(10000000,99999999),
                 'member_id' => Auth::user()->is_member->member->id,
                 'checkin_time' => $now,
                 'user_id' => $dayin->user_id
             ]);
+
+            $user = Auth::user();
+
+            Notification::send($user, new CheckInNotification($kunjungan));
+            Mail::to($dayin->users->email)->send(new CheckIn($kunjungan));
 
             DB::commit();
             return redirect()->route('kunjungan.index')->with('success', 'Success Checkin Today');
