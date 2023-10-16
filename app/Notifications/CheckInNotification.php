@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\KunjunganMember;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,12 +13,13 @@ class CheckInNotification extends Notification
 {
     use Queueable;
 
+    // private $kunjungan;
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(public KunjunganMember $kunjungan)
     {
-        //
+        // $this->kunjungan =  $kunjungan;
     }
 
     /**
@@ -32,12 +35,19 @@ class CheckInNotification extends Notification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable)
     {
+        // dd($this->kunjungan);
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->subject('Successfully Daily Checkin - '.env('APP_NAME', 'Natural Fitness Center'))
+            ->view(
+                'templates.pages.kunjungan.email-checkin',
+                [
+                    'kunjungan' => $this->kunjungan,
+                    'date' => Carbon::parse($this->kunjungan->kunjungan->datein)->format('d F Y'),
+                    'time' => Carbon::parse($this->kunjungan->checkin_time)->format('H:i:s'),
+                ]
+            );
     }
 
     /**

@@ -89,7 +89,7 @@
 
                             @if (@$today->checkout_time)
                                 <div class="mb-3">
-                                    <label for="timeCheckOut" class="form-label">Checkin Time</label>
+                                    <label for="timeCheckOut" class="form-label">Checkout Time</label>
                                     @php($tglOut = \Carbon\Carbon::parse($today->kunjungan->datein)->format('d M Y')." ".\Carbon\Carbon::parse($today->checkout_time)->format('H:i:s'))
                                     <input type="text" class="form-control" id="timeCheckOut" name="timeCheckOut" value="{{ $tglOut }}" placeholder="Enter Code Day In" readonly disabled>
                                 </div>

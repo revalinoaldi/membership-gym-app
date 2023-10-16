@@ -21,7 +21,7 @@ class DayinController extends Controller
         return view('templates.pages.dayin.index',[
             'totalToday' => $today->first(),
             'allTotal' => KunjunganMember::count(),
-            'dayins' => KunjunganDayin::orderBy('datein')->get()
+            'dayins' => KunjunganDayin::orderBy('datein', 'desc')->get()
         ]);
     }
 
